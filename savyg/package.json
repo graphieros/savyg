@@ -1,0 +1,49 @@
+{
+  "name": "savyg",
+  "private": false,
+  "version": "0.0.2",
+  "description": "A savvy library to create svg elements and charts with ease",
+  "author": "Alec Lloyd Probert",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/graphieros/savyg"
+  },
+  "license": "MIT",
+  "homepage": "https://savyg.graphieros.com",
+  "keywords": [
+    "svg",
+    "svg library",
+    "charts",
+    "svg charts",
+    "svg element",
+    "line",
+    "circle",
+    "rect",
+    "polygon",
+    "foreignObject"
+  ],
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "npm run test && tsc && vite build",
+    "test": "vitest --run",
+    "testw": "vitest --watch"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/savyg.js",
+      "require": "./dist/savyg.umd.cjs"
+    }
+  },
+  "main": "./dist/savyg.umd.cjs",
+  "module": "./dist/savyg.js",
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.7.0",
+    "vitest": "^1.1.3"
+  }
+}
