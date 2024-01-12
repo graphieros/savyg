@@ -203,8 +203,47 @@ export function svg(attrs: {
     })
 }
 
+export function linearGradient(attrs: {
+    stops: any,
+    parent?: HTMLElement | SVGElement
+    id: string,
+    direction: "vertical" | "horizontal"
+}) {
+    const def = document.createElementNS(CONSTANT.XMLNS, SvgItem.DEFS)
+    const linearGradient = document.createElementNS(CONSTANT.XMLNS, SvgItem.LINEAR_GRADIENT)
+    linearGradient.setAttribute("id", attrs.id)
+    if (attrs.direction === "vertical") {
+        linearGradient.setAttribute('x2', "0%")
+        linearGradient.setAttribute('y2', "100%")
+    } else {
+        linearGradient.setAttribute('x1', '0%')
+        linearGradient.setAttribute('y1', '0%')
+        linearGradient.setAttribute('x2', '100%')
+        linearGradient.setAttribute('y2', '0%')
+    }
+
+    attrs.stops.forEach((stop: { [x: string]: any; offset: string; }) => {
+        const s = document.createElementNS(CONSTANT.XMLNS, SvgItem.STOP);
+        s.setAttribute('offset', stop.offset)
+        s.setAttribute('stop-color', stop['stop-color'])
+        if (stop['stop-opacity']) {
+            s.setAttribute('stop-opacity', String(stop['stop-opacity']))
+        }
+        linearGradient.appendChild(s)
+    })
+
+    def.appendChild(linearGradient)
+
+    if (attrs.parent) {
+        attrs.parent.appendChild(def)
+    }
+
+    return def
+}
+
 const utils_svg = {
     circle,
+    linearGradient,
     element,
     freePolygon,
     line,

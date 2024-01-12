@@ -92,7 +92,17 @@ export function ratioToMax(value: number, max: number) {
     return value / max
 }
 
+export function createUid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+        .replace(/[xy]/g, function (c) {
+            const r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+}
+
 const utils_commons = {
+    createUid,
     getMinMaxInDatasetItems,
     getSvgDimensions,
     getMaxSerieLength,

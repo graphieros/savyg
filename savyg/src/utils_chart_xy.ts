@@ -1,36 +1,43 @@
-import { ChartArea, StrokeLinecap, StrokeLinejoin, SvgItem } from "./utils_svg_types"
-import { element, line, svg, text } from "./utils_svg";
-import { calculateNiceScale, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
+import { ChartArea, StrokeOptions, SvgItem } from "./utils_svg_types"
+import { circle, element, line, linearGradient, path, svg, text } from "./utils_svg";
+import { calculateNiceScale, createUid, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
+import { palette } from "./palette";
 
-export type BaseDatasetItem = {
+// TODO: add descriptions for types
+
+export type BaseDatasetItem = StrokeOptions & {
+    dataLabelOffsetY?: number
+    dataLabelsColor?: string
+    dataLabelsFontSize?: number
     name?: string
+    plotRadius?: number
+    rounding?: number
+    type?: "line" | "bar" | "area" | "plot"
     values: Array<number | null>
+    fill?: string
+    gradientFrom?: string
+    gradientTo?: string
+    gradientDirection?: "vertical" | "horizontal"
 }
 
 export type ChartXyDatasetItem = BaseDatasetItem & {
-    stroke?: string
-    "stroke-width"?: number
-    "stroke-linecap"?: StrokeLinecap
-    "stroke-linejoin"?: StrokeLinejoin
-    "stroke-dasharray"?: number
-    "stroke-dashoffset"?: number
     showDataLabels?: boolean
 }
 
 export type ChartXyOptions = {
     backgroundColor?: string;
-    viewBox?: string;
     className?: string;
+    fontFamily?: string
+    paddingBottom?: number;
     paddingLeft?: number;
     paddingRight?: number;
     paddingTop?: number;
-    paddingBottom?: number;
     title?: string;
     titlePosition?: "left" | "center" | "right";
-    yAxisLabelsFontSize?: number
+    viewBox?: string;
     xAxisLabels?: string[]
     xAxisLabelsFontSize?: number
-    fontFamily?: string
+    yAxisLabelsFontSize?: number
 }
 
 export function chartXy({
@@ -42,6 +49,29 @@ export function chartXy({
     options?: ChartXyOptions,
     parent?: HTMLElement
 }) {
+    const formattedDataset = dataset.map((ds, i) => {
+        return {
+            ...ds,
+            type: ds.type ?? 'line',
+            color: ds.stroke ?? palette[i],
+            showDataLabels: ds.showDataLabels ?? true,
+            rounding: ds.rounding ?? 0,
+            plotRadius: ds.plotRadius ?? 1,
+            dataLabelOffsetY: ds.dataLabelOffsetY ?? 0,
+            dataLabelsFontSize: ds.dataLabelsFontSize ?? 10,
+            dataLabelsColor: ds.dataLabelsColor ?? '#000000',
+            fill: ds.fill ?? 'none',
+            "stroke-width": ds['stroke-width'] ?? 1.5,
+            "stroke-dasharray": ds['stroke-dasharray'] ?? null,
+            "stroke-dashoffset": ds['stroke-dashoffset'] ?? null,
+            "stroke-linecap": ds['stroke-linecap'] ?? 'round',
+            "stroke-linejoin": ds['stroke-linejoin'] ?? 'round',
+            gradientFrom: ds.gradientFrom ?? null,
+            gradientTo: ds.gradientTo ?? null,
+            gradientDirection: ds.gradientDirection ?? 'vertical'
+        }
+    })
+
     const userOptions: ChartXyOptions = {
         backgroundColor: options?.backgroundColor ?? "#FFFFFF",
         viewBox: options?.viewBox ?? '0 0 512 341',
@@ -181,6 +211,162 @@ export function chartXy({
             }
         }
     }
+
+    // --- PLOTS (line, plot & area datasetItem types)
+    const g_plot_area_line = element({
+        el: SvgItem.G,
+        options: {
+            className: 'savyg-plot-area-line'
+        },
+        parent: chart
+    })
+    const plotAndLineDatasets = formattedDataset.filter(ds => ["plot", "line", "area"].includes(ds.type!))
+
+    plotAndLineDatasets.forEach(ds => {
+        if (ds.values.length) {
+            ds.values.forEach((value, i) => {
+                if (value !== null) {
+                    circle({
+                        options: {
+                            r: ds.plotRadius!,
+                            cx: chartArea.left + (slot * i) + (slot / 2),
+                            cy: normalize(value),
+                            fill: ds.color,
+                            stroke: ds.stroke,
+                            "stroke-width": ds["stroke-width"],
+                            "stroke-dasharray": ds["stroke-dasharray"]!,
+                            "stroke-dashoffset": ds["stroke-dashoffset"]!,
+                            "stroke-linecap": ds["stroke-linecap"],
+                            "stroke-linejoin": ds["stroke-linejoin"],
+                        },
+                        parent: g_plot_area_line
+                    })
+
+                    if (ds.showDataLabels) {
+                        text({
+                            options: {
+                                x: chartArea.left + (slot * i) + (slot / 2),
+                                y: normalize(value) - (ds.dataLabelsFontSize! / 2) + ds.dataLabelOffsetY,
+                                "text-anchor": "middle",
+                                "font-size": ds.dataLabelsFontSize,
+                                content: Number(value.toFixed(ds.rounding)).toLocaleString(),
+                                fill: ds.dataLabelsColor
+                            },
+                            parent: g_plot_area_line
+                        })
+                    }
+                }
+            })
+        }
+    })
+
+    // --- LINES (line datasetItem types only)
+    const g_line = element({
+        el: SvgItem.G,
+        options: {
+            className: 'savyg-line'
+        },
+        parent: chart
+    })
+    const lineDatasets = formattedDataset.filter(ds => ds.type === 'line');
+
+    lineDatasets.forEach((ds) => {
+        if (ds.values.length) {
+            const normalizedValues = ds.values.map((v, j) => {
+                return {
+                    x: chartArea.left + (slot * j) + (slot / 2),
+                    y: v === null ? null : normalize(v)
+                }
+            })
+            path({
+                options: {
+                    d: 'M' + normalizedValues.map(v => {
+                        if (v.y === null) {
+                            return 'M '
+                        } else {
+                            return `${v.x},${v.y} `
+                        }
+                    }).join(' '),
+                    fill: "none",
+                    stroke: ds.color,
+                    "stroke-width": ds["stroke-width"],
+                    "stroke-dasharray": ds["stroke-dasharray"]!,
+                    "stroke-dashoffset": ds["stroke-dashoffset"]!,
+                    "stroke-linecap": ds["stroke-linecap"],
+                    "stroke-linejoin": ds["stroke-linejoin"],
+                },
+                parent: g_line
+            })
+        }
+    })
+
+    // --- AREAS (area datasetItem types only)
+    const g_area = element({
+        el: SvgItem.G,
+        options: {
+            className: 'savyg-area'
+        },
+        parent: chart
+    })
+
+    const areaDatasets = formattedDataset.filter(ds => ds.type === 'area');
+
+    areaDatasets.forEach((ds) => {
+        if (ds.values.length) {
+            const normalizedValues = ds.values.map((v, j) => {
+                return {
+                    x: chartArea.left + (slot * j) + (slot / 2),
+                    y: v === null ? null : normalize(v)
+                }
+            })
+
+            const hasGradient = ds.gradientFrom && ds.gradientTo && ds.gradientDirection;
+            const areaGradientId = createUid()
+            if (hasGradient) {
+                const stops = [
+                    {
+                        offset: "0%",
+                        'stop-color': ds.gradientFrom,
+                        'stop-opacity': 1
+                    },
+                    {
+                        offset: "100%",
+                        'stop-color': ds.gradientTo,
+                        'stop-opacity': 1
+                    },
+                ]
+
+                linearGradient({
+                    stops,
+                    id: areaGradientId,
+                    parent: g_area,
+                    direction: ds.gradientDirection
+                })
+            }
+
+            path({
+                options: {
+                    d: `M ${normalizedValues[0].x},${chartArea.bottom} ${normalizedValues.map(v => {
+                        if (v.y === null) {
+                            return ' '
+                        } else {
+                            return `${v.x},${v.y} `
+                        }
+                    }).join(' ')} ${normalizedValues[normalizedValues.length - 1].x},${chartArea.bottom}Z`,
+                    fill: hasGradient ? `url(#${areaGradientId})` : ds.fill,
+                    stroke: ds.color,
+                    "stroke-width": ds["stroke-width"],
+                    "stroke-dasharray": ds["stroke-dasharray"]!,
+                    "stroke-dashoffset": ds["stroke-dashoffset"]!,
+                    "stroke-linecap": ds["stroke-linecap"],
+                    "stroke-linejoin": ds["stroke-linejoin"],
+                },
+                parent: g_area
+            })
+        }
+    })
+
+    // --- BARS (bar datasetItem types only)
 
 
     /**************************************************************************/
