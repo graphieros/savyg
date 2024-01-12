@@ -13,7 +13,7 @@ export function getSvgDimensions(viewBox: string) {
 }
 
 export function getMinMaxInDatasetItems(datasetItems: BaseDatasetItem[]) {
-    const flattened = datasetItems.flatMap(d => d.values);
+    const flattened = datasetItems.flatMap(d => d.values.filter(v => v !== null)) as number[];
     return {
         max: Math.max(...flattened),
         min: Math.min(...flattened)

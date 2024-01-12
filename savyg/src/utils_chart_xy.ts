@@ -4,7 +4,7 @@ import { calculateNiceScale, getMaxSerieLength, getMinMaxInDatasetItems, getSvgD
 
 export type BaseDatasetItem = {
     name?: string
-    values: number[]
+    values: Array<number | null>
 }
 
 export type ChartXyDatasetItem = BaseDatasetItem & {

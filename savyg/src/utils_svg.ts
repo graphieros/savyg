@@ -21,7 +21,7 @@ export function element<T extends SvgItem>(attrs: {
                     item.classList.add(cn)
                 })
             } else {
-                if (key !== 'className') {
+                if (!['className', 'content'].includes(key)) {
                     item.setAttribute(optionKey, String(value));
                 }
             }

@@ -62,18 +62,20 @@ export type SvgWrapper = CommonOptions & {
     id?: string
 }
 
-export type Text = CommonOptions & {
+export type Text = CommonOptions & StrokeOptions & {
     x: number;
     y: number;
     "font-size"?: number
     "font-weight"?: "bold" | "normal"
     "text-anchor"?: "start" | "middle" | "end"
     content: string
+    fill?: string
 }
 
 export type Path = StrokeOptions & CommonOptions & {
     d: string
     id?: string
+    fill?: string
 }
 
 export type Stop = CommonOptions & {
