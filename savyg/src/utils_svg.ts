@@ -28,6 +28,10 @@ export function element<T extends SvgItem>(attrs: {
         });
     }
 
+    if (attrs.options.content) {
+        item.innerHTML = attrs.options.content;
+    }
+
     if (attrs.parent) {
         attrs.parent.appendChild(item)
     }
@@ -114,6 +118,22 @@ export function path(attrs: {
     })
 }
 
+/**
+ * 
+ * @description Creates a svg path element. To append the path to an existing svg, provide the svg attribute. Otherwise, the path is returned so you can dispose of it as you please.
+ * @returns a svg path element
+ */
+export function text(attrs: {
+    options: SvgOptions[SvgItem.TEXT],
+    parent?: SVGElement | HTMLElement,
+}) {
+    return element({
+        el: SvgItem.TEXT,
+        options: attrs.options,
+        parent: attrs.parent
+    })
+}
+
 export function calcPolygonPoints({
     centerX,
     centerY,
@@ -191,7 +211,8 @@ const utils_svg = {
     path,
     rect,
     regularPolygon,
-    svg
+    svg,
+    text
 }
 
 export default utils_svg

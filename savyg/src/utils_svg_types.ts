@@ -10,11 +10,13 @@ export enum SvgItem {
     RECT = "rect",
     STOP = "stop",
     SVG = "svg",
-    FOREIGN_OBJECT = "foreignObject"
+    FOREIGN_OBJECT = "foreignObject",
+    TEXT = "text"
 }
 
 export type CommonOptions = {
     className?: string
+    content?: string
 }
 
 export type Coordinates = {
@@ -23,7 +25,7 @@ export type Coordinates = {
     z?: number
 }
 
-export type Shape = "circle" | "defs" | "g" | "line" | "linearGradient" | "radialGradient" | "path" | "polygon" | "rect" | "stop" | "svg" | "foreignObject"
+export type Shape = "circle" | "defs" | "g" | "line" | "linearGradient" | "radialGradient" | "path" | "polygon" | "rect" | "stop" | "svg" | "foreignObject" | "text"
 
 export type StrokeLinecap = "round" | "butt" | "square"
 export type StrokeLinejoin = "arcs" | "bevel" | "miter" | "miter-clip" | "round"
@@ -49,6 +51,7 @@ export type SvgOptions = {
     [SvgItem.STOP]: Stop
     [SvgItem.SVG]: SvgWrapper
     [SvgItem.FOREIGN_OBJECT]: ForeignObject
+    [SvgItem.TEXT]: Text
 
 };
 
@@ -57,6 +60,15 @@ export type SvgWrapper = CommonOptions & {
     height?: string
     width?: string
     id?: string
+}
+
+export type Text = CommonOptions & {
+    x: number;
+    y: number;
+    "font-size"?: number
+    "font-weight"?: "bold" | "normal"
+    "text-anchor"?: "start" | "middle" | "end"
+    content: string
 }
 
 export type Path = StrokeOptions & CommonOptions & {
