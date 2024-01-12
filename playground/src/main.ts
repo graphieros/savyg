@@ -7,22 +7,26 @@ chartXy({
   dataset: [
     {
       name: 'serie 1',
-      values: [-120.18, 0, 25, 0, 12, 25, 50, 102],
-      type: "area",
+      values: [-120.18, 0, 25, 0, 12, 25, 50, 102, 165, 220, 143, 212],
+      type: "bar",
       rounding: 1,
       plotRadius: 0,
       gradientFrom: "#FF000033",
-      gradientTo: "#0000FF33"
+      gradientTo: "#0000FF33",
+      rx: 3
     },
     {
-      name: 'serie 2',
-      values: [-10, 20, 125, 0, null, 5, 36, 56],
-      type: "plot",
+      name: 'serie 2 with a long name',
+      values: [-10, 20, 125, null, 12, 5, 36, 56],
+      type: "line",
       fill: "#FF000033"
     },
   ],
   parent: div,
   options: {
-    xAxisLabels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG"]
+    barSpacing: 2,
+    showAxis: true,
+    xAxisLabels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+    title: "Title",
   }
 })
