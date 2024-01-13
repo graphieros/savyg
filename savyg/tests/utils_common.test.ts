@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax } from "../utils_common"
+import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax } from "../src/utils_common"
 
 describe('getSvgDimensions', () => {
     test('parses dimensions of a string viewBox', () => {

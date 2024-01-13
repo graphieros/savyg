@@ -207,10 +207,18 @@ export function linearGradient(attrs: {
     stops: any,
     parent?: HTMLElement | SVGElement
     id: string,
-    direction: "vertical" | "horizontal"
+    direction: "vertical" | "horizontal",
+    gradientUnits?: "userSpaceOnUse" | "objectBoundingBox",
+    spreadMethod?: "pad" | "reflect" | "repeat", // defaults to pad
 }) {
     const def = document.createElementNS(CONSTANT.XMLNS, SvgItem.DEFS)
     const linearGradient = document.createElementNS(CONSTANT.XMLNS, SvgItem.LINEAR_GRADIENT)
+    if (attrs.gradientUnits) {
+        linearGradient.setAttribute('gradientUnits', attrs.gradientUnits)
+    }
+    if (attrs.spreadMethod) {
+        linearGradient.setAttribute('spreadMethod', attrs.spreadMethod)
+    }
     linearGradient.setAttribute("id", attrs.id)
     if (attrs.direction === "vertical") {
         linearGradient.setAttribute('x2', "0%")
@@ -241,7 +249,61 @@ export function linearGradient(attrs: {
     return def
 }
 
-// TODO: radialGradient
+export function radialGradient(attrs: {
+    cx?: string,
+    cy?: string,
+    fx?: string, // defaults to cx
+    fy?: string, // defaults to cy
+    fr?: string, // defaults to 0%
+    r?: string, // defaults to 50%
+    gradientUnits?: "userSpaceOnUse" | "objectBoundingBox",
+    spreadMethod?: "pad" | "reflect" | "repeat", // defaults to pad
+    stops: any,
+    parent?: HTMLElement | SVGElement,
+    id: string,
+}) {
+    const def = document.createElementNS(CONSTANT.XMLNS, SvgItem.DEFS)
+    const radialGradient = document.createElementNS(CONSTANT.XMLNS, SvgItem.RADIAL_GRADIENT)
+    radialGradient.setAttribute("id", attrs.id)
+    if (attrs.cx) {
+        radialGradient.setAttribute('cx', attrs.cx)
+    }
+    if (attrs.cy) {
+        radialGradient.setAttribute('cy', attrs.cy)
+    }
+    if (attrs.fx) {
+        radialGradient.setAttribute('fx', attrs.fx)
+    }
+    if (attrs.fy) {
+        radialGradient.setAttribute('fy', attrs.fy)
+    }
+    if (attrs.fr) {
+        radialGradient.setAttribute('fr', attrs.fr)
+    }
+    if (attrs.gradientUnits) {
+        radialGradient.setAttribute('gradientUnits', attrs.gradientUnits)
+    }
+    if (attrs.spreadMethod) {
+        radialGradient.setAttribute('spreadMethod', attrs.spreadMethod)
+    }
+    attrs.stops.forEach((stop: { [x: string]: any; offset: string; }) => {
+        const s = document.createElementNS(CONSTANT.XMLNS, SvgItem.STOP);
+        s.setAttribute('offset', stop.offset)
+        s.setAttribute('stop-color', stop['stop-color'])
+        if (stop['stop-opacity']) {
+            s.setAttribute('stop-opacity', String(stop['stop-opacity']))
+        }
+        radialGradient.appendChild(s)
+    })
+
+    def.appendChild(radialGradient)
+
+    if (attrs.parent) {
+        attrs.parent.appendChild(def)
+    }
+
+    return def
+}
 
 const utils_svg = {
     circle,
@@ -250,6 +312,7 @@ const utils_svg = {
     freePolygon,
     line,
     path,
+    radialGradient,
     rect,
     regularPolygon,
     svg,

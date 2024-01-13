@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, expect, test } from "vitest"
-import { circle, freePolygon, line, path, rect, svg, text } from "../utils_svg"
+import { circle, freePolygon, line, path, rect, svg, text, linearGradient, radialGradient } from "../src/utils_svg"
 
 describe('circle', () => {
     test("returns a circle svg element", () => {
@@ -197,5 +197,64 @@ describe('svg', () => {
             }
         })
         expect(s.toString()).toEqual(`<svg viewBox="0 0 100 100" height="100%" width="100%" class="name1 name2"></svg>`)
+    })
+})
+
+describe('linearGradient', () => {
+    test('returns a def element including a vertical linearGradient and stop elements', () => {
+        const lg = linearGradient({
+            stops: [
+                {
+                    offset: "0%",
+                    "stop-color": "#FF0000"
+                },
+                {
+                    offset: "100%",
+                    "stop-color": "#0000FF"
+                },
+            ],
+            id: "lg",
+            direction: "vertical",
+        })
+        expect(lg.toString()).toEqual(`<defs><lineargradient id="lg" x2="0%" y2="100%"><stop offset="0%" stop-color="#FF0000"></stop><stop offset="100%" stop-color="#0000FF"></stop></lineargradient></defs>`)
+    })
+
+    test('returns a def element including a horizontal linearGradient and stop elements', () => {
+        const lg = linearGradient({
+            stops: [
+                {
+                    offset: "0%",
+                    "stop-color": "#FF0000"
+                },
+                {
+                    offset: "100%",
+                    "stop-color": "#0000FF"
+                },
+            ],
+            id: "lg",
+            direction: "horizontal",
+            gradientUnits: "userSpaceOnUse",
+            spreadMethod: "reflect",
+        })
+        expect(lg.toString()).toEqual(`<defs><lineargradient gradientUnits="userSpaceOnUse" spreadMethod="reflect" id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FF0000"></stop><stop offset="100%" stop-color="#0000FF"></stop></lineargradient></defs>`)
+    })
+})
+
+describe('radialGradient', () => {
+    test('returns a def element including a radialGradient with stop elements', () => {
+        const rg = radialGradient({
+            stops: [
+                {
+                    offset: "0%",
+                    "stop-color": "#FF0000"
+                },
+                {
+                    offset: "100%",
+                    "stop-color": "#0000FF"
+                },
+            ],
+            id: "rg"
+        })
+        expect(rg.toString()).toEqual(`<defs><radialgradient id="rg"><stop offset="0%" stop-color="#FF0000"></stop><stop offset="100%" stop-color="#0000FF"></stop></radialgradient></defs>`)
     })
 })
