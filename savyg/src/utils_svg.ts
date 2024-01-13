@@ -241,6 +241,8 @@ export function linearGradient(attrs: {
     return def
 }
 
+// TODO: radialGradient
+
 const utils_svg = {
     circle,
     linearGradient,
