@@ -182,7 +182,8 @@ export function chartXy({
                 y: userOptions.paddingTop! / 2,
                 "text-anchor": userOptions.titlePosition,
                 content: userOptions.title,
-                "font-weight": "bold"
+                "font-weight": "bold",
+                fill: userOptions.titleColor
             },
             parent: chart
         })
