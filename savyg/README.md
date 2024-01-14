@@ -67,6 +67,42 @@ import { chartXy } from "savyg";
     })
 
 ```
+
+[check the docs](https://savyg.graphieros.com/docs#charts)
+
+Here is how you can create a donut chart:
+
+```
+import { chartDonut } from "savyg";
+
+chartDonut({
+   dataset: [
+      {
+         name: "serie 1",
+         value: 20,
+      },
+      {
+         name: "serie 2",
+         value: 10,
+      },
+      {
+         name: "serie 3",
+         value: 10,
+      },
+      {
+         name: "serie 4",
+         value: 20,
+      },
+   ],
+   // The HTML element where the chart will be inserted:
+   parent: document.querySelector('#myDiv'),
+   options: {
+      title: "Title",
+   }
+})
+
+```
+
 [check the docs](https://savyg.graphieros.com/docs#charts)
 
 
@@ -90,4 +126,4 @@ circle({
 })
 
 ```
-[check the docs for the SVG api](https://savyg.graphieros.com/docs#svgapi)
+[check detailed SVG api here](https://savyg.graphieros.com/docs#svgapi)
