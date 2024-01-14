@@ -147,3 +147,10 @@ alreadyDeclaredSvg.appendChild(myGreenRect)
 
 ```
 [check detailed SVG api here](https://savyg.graphieros.com/docs#svgapi)
+
+
+## Headless
+
+savyg does not ship css files.
+
+To further customize your charts, css classes are exposed.

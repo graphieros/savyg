@@ -85,6 +85,7 @@ export type Text = CommonOptions & StrokeOptions & {
     "text-anchor"?: TextAnchor
     content: string
     fill?: string
+    id?: string
 }
 
 export type Path = StrokeOptions & CommonOptions & {

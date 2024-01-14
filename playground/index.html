@@ -6,6 +6,26 @@
     <title>savyg playground</title>
   </head>
   <body>
+    <style>
+      .savyg-arc-unselected,
+      .savyg-marker-name-unselected,
+      .savyg-marker-value-unselected {
+        opacity:0.3;
+        transform: scale(0.95,0.95);
+        transform-origin:50%;
+        transition: all 0.3s ease-in-out;
+      }
+      .savyg-marker-line-unselected,
+      .savyg-marker-circle-unselected {
+        opacity: 0;
+      }
+      .savyg-arc-selected {
+        transform: scale(1.02,1.02);
+        transform-origin:50%;
+        transition: all 0.3s ease-in-out;
+        filter:drop-shadow(0 6px 12px rgba(0,0,0,0.3))
+      }
+    </style>
     <div id="div" style="font-family: Arial, Helvetica, sans-serif">
     </div>
     <script type="module" src="/src/main.ts"></script>

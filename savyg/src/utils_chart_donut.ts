@@ -154,7 +154,7 @@ export function chartDonut({
             parent: chart
         })
 
-        arcs.forEach((arc: { path: string, color: string, name: string, proportion: number, value: number, center: { endX: number, endY: number } }) => {
+        arcs.forEach((arc: { path: string, color: string, name: string, proportion: number, value: number, center: { endX: number, endY: number } }, i: number) => {
             const labelPosition = positionDonutLabel({ drawingArea, element: arc })
             text({
                 options: {
@@ -163,7 +163,8 @@ export function chartDonut({
                     fill: userOptions.dataLabelsColor!,
                     "font-size": userOptions.dataLabelsFontSize!,
                     "text-anchor": labelPosition.textAnchor as TextAnchor,
-                    content: arc.name
+                    content: arc.name,
+                    id: `${globalUid}_marker_name_${i}`,
                 },
                 parent: markers
             })
@@ -176,7 +177,8 @@ export function chartDonut({
                     fill: userOptions.dataLabelsColor!,
                     "font-size": userOptions.dataLabelsFontSize!,
                     "text-anchor": percentagePosition.textAnchor as TextAnchor,
-                    content: `${Number((arc.proportion * 100).toFixed(userOptions.dataLabelsRoundingPercentage)).toLocaleString()}% (${Number(arc.value.toFixed(userOptions.dataLabelsRoundingValue)).toLocaleString()})`
+                    content: `${Number((arc.proportion * 100).toFixed(userOptions.dataLabelsRoundingPercentage)).toLocaleString()}% (${Number(arc.value.toFixed(userOptions.dataLabelsRoundingValue)).toLocaleString()})`,
+                    id: `${globalUid}_marker_value_${i}`,
                 },
                 parent: markers
             })
@@ -188,7 +190,8 @@ export function chartDonut({
                     x2: createDonutMarker({ drawingArea, element: arc, offset: drawingArea.width / 5 }).x2,
                     y2: createDonutMarker({ drawingArea, element: arc, offset: drawingArea.width / 5 }).y2,
                     stroke: arc.color,
-                    "stroke-width": 1
+                    "stroke-width": 1,
+                    id: `${globalUid}_marker_line_${i}`,
                 },
                 parent: markers
             })
@@ -199,7 +202,8 @@ export function chartDonut({
                     cy: arc.center.endY,
                     fill: arc.color,
                     r: 3,
-                    stroke: "none"
+                    stroke: "none",
+                    id: `${globalUid}_marker_circle_${i}`,
                 },
                 parent: markers
             })
@@ -217,6 +221,54 @@ export function chartDonut({
 
     function tooltip(index: number) {
         const tt = document.getElementById(tooltipId) as HTMLElement;
+
+        for (let i = 0; i < formattedDataset.length; i += 1) {
+            if (i !== index) {
+                const arc = document.getElementById(`${globalUid}_${i}`)
+                if (arc) {
+                    arc.classList.add('savyg-arc-unselected')
+                }
+                const markerTextName = document.getElementById(`${globalUid}_marker_name_${i}`)
+                if (markerTextName) {
+                    markerTextName.classList.add('savyg-marker-name-unselected')
+                }
+                const markerTextValue = document.getElementById(`${globalUid}_marker_value_${i}`)
+                if (markerTextValue) {
+                    markerTextValue.classList.add('savyg-marker-value-unselected')
+                }
+                const markerLine = document.getElementById(`${globalUid}_marker_line_${i}`)
+                if (markerLine) {
+                    markerLine.classList.add("savyg-marker-line-unselected")
+                }
+                const markerCircle = document.getElementById(`${globalUid}_marker_circle_${i}`)
+                if (markerCircle) {
+                    markerCircle.classList.add("savyg-marker-circle-unselected")
+                }
+            } else {
+                const arc = document.getElementById(`${globalUid}_${i}`)
+                if (arc) {
+                    arc.classList.add('savyg-arc-selected')
+                }
+                const markerTextName = document.getElementById(`${globalUid}_marker_name_${i}`)
+                if (markerTextName) {
+                    markerTextName.classList.add('savyg-marker-name-selected')
+                }
+                const markerTextValue = document.getElementById(`${globalUid}_marker_value_${i}`)
+                if (markerTextValue) {
+                    markerTextValue.classList.add('savyg-marker-value-selected')
+                }
+                const markerLine = document.getElementById(`${globalUid}_marker_line_${i}`)
+                if (markerLine) {
+                    markerLine.classList.add("savyg-marker-line-selected")
+                }
+                const markerCircle = document.getElementById(`${globalUid}_marker_circle_${i}`)
+                if (markerCircle) {
+                    markerCircle.classList.add("savyg-marker-circle-selected")
+                }
+            }
+        }
+
+
         let html = '';
         html += `<div style="display:flex;flex-direction:row;gap:4px;align-items:center"><svg viewBox="0 0 20 20" height="14" width="14" style="margin-right:3px;margin-bottom:-1px"><circle cx="10" cy="10" r="9" fill="${formattedDataset[index].color}"/></svg><div>${formattedDataset[index].name ?? '-'}</div></div>`
         html += `<div>${Number((formattedDataset[index].value / grandTotal * 100).toFixed(userOptions.dataLabelsRoundingPercentage)).toLocaleString()}% (${Number(formattedDataset[index].value.toFixed(userOptions.dataLabelsRoundingValue)).toLocaleString()})</div>`
@@ -225,6 +277,35 @@ export function chartDonut({
 
     function killTooltip(index: number) {
         const tt = document.getElementById(tooltipId);
+
+        for (let i = 0; i < formattedDataset.length; i += 1) {
+            const arc = document.getElementById(`${globalUid}_${i}`)
+            if (arc) {
+                arc.classList.remove('savyg-arc-unselected')
+                arc.classList.remove('savyg-arc-selected')
+            }
+            const markerTextName = document.getElementById(`${globalUid}_marker_name_${i}`)
+            if (markerTextName) {
+                markerTextName.classList.remove('savyg-marker-name-unselected')
+                markerTextName.classList.remove('savyg-marker-name-selected')
+            }
+            const markerTextValue = document.getElementById(`${globalUid}_marker_value_${i}`)
+            if (markerTextValue) {
+                markerTextValue.classList.remove('savyg-marker-value-unselected')
+                markerTextValue.classList.remove('savyg-marker-value-selected')
+            }
+            const markerLine = document.getElementById(`${globalUid}_marker_line_${i}`)
+            if (markerLine) {
+                markerLine.classList.remove("savyg-marker-line-unselected")
+                markerLine.classList.remove("savyg-marker-line-selected")
+            }
+            const markerCircle = document.getElementById(`${globalUid}_marker_circle_${i}`)
+            if (markerCircle) {
+                markerCircle.classList.remove("savyg-marker-circle-unselected")
+                markerCircle.classList.remove("savyg-marker-circle-selected")
+            }
+        }
+
         tt!.setAttribute("style", "display:none");
         const trap = document.getElementById(`${globalUid}_${index}`);
         trap?.setAttribute('fill', 'transparent');

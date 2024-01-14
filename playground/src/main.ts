@@ -53,8 +53,5 @@ chartDonut({
   parent: div,
   options: {
     title: "Title",
-    showLegend: true,
-    showTotal: true,
-    showDataLabels: false
   }
 })
