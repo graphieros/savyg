@@ -1,45 +1,7 @@
-import { chartXy, radialGradient, svg, circle } from "savyg";
+import { chartXy, radialGradient, svg, circle, chartDonut } from "savyg";
 
 // const parent = document.getElementById("svg") as HTMLElement
 const div = document.getElementById("div") as HTMLElement
-
-const s = svg({
-  options: {
-    viewBox: '0 0 100 100',
-    height: "200px",
-    width: "200px",
-  },
-  parent: div
-})
-
-radialGradient({
-  stops: [
-    {
-      offset: "0%",
-      "stop-color": "#FF0000",
-    },
-    {
-      offset: "100%",
-      "stop-color": "#0000FF",
-    },
-  ],
-  parent: s,
-  fx: "40%",
-  fy: "40%",
-  spreadMethod: "repeat",
-  gradientUnits: "userSpaceOnUse",
-  id: "grad"
-})
-
-circle({
-  options: {
-    cx: 50,
-    cy: 50,
-    r: 40,
-    fill: "url(#grad)"
-  },
-  parent: s
-})
 
 chartXy({
   dataset: [
@@ -66,5 +28,33 @@ chartXy({
     showAxis: true,
     xAxisLabels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
     title: "Title",
+  }
+})
+
+chartDonut({
+  dataset: [
+    {
+      name: "serie 1",
+      value: 20,
+    },
+    {
+      name: "serie 2",
+      value: 10,
+    },
+    {
+      name: "serie 3",
+      value: 10,
+    },
+    {
+      name: "serie 4",
+      value: 20,
+    },
+  ],
+  parent: div,
+  options: {
+    title: "Title",
+    showLegend: true,
+    showTotal: true,
+    showDataLabels: false
   }
 })

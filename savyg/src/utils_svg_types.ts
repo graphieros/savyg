@@ -25,6 +25,19 @@ export type Coordinates = {
     z?: number
 }
 
+export type DrawingArea = {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+    height: number;
+    width: number;
+    fullHeight: number;
+    fullWidth: number;
+    centerX: number;
+    centerY: number;
+}
+
 export type Shape = "circle" | "defs" | "g" | "line" | "linearGradient" | "radialGradient" | "path" | "polygon" | "rect" | "stop" | "svg" | "foreignObject" | "text"
 
 export type StrokeLinecap = "round" | "butt" | "square"
@@ -62,12 +75,14 @@ export type SvgWrapper = CommonOptions & {
     id?: string
 }
 
+export type TextAnchor = "start" | "middle" | "end"
+
 export type Text = CommonOptions & StrokeOptions & {
     x: number;
     y: number;
     "font-size"?: number
     "font-weight"?: "bold" | "normal"
-    "text-anchor"?: "start" | "middle" | "end"
+    "text-anchor"?: TextAnchor
     content: string
     fill?: string
 }

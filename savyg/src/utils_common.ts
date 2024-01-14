@@ -1,4 +1,5 @@
 import { BaseDatasetItem } from "./utils_chart_xy";
+import { DrawingArea } from "./utils_svg_types";
 
 
 export function getSvgDimensions(viewBox: string) {
@@ -101,14 +102,192 @@ export function createUid() {
         });
 }
 
+export function rotateMatrix(x: number) {
+    return [
+        [Math.cos(x), -Math.sin(x)],
+        [Math.sin(x), Math.cos(x)],
+    ];
+}
+
+export function addVector([a1, a2]: any, [b1, b2]: [number, number]) {
+    return [a1 + b1, a2 + b2];
+}
+
+export function matrixTimes([[a, b], [c, d]]: any, [x, y]: [number, number]) {
+    return [a * x + b * y, c * x + d * y];
+}
+
+export function createArc([cx, cy]: any, [rx, ry]: any, [position, ratio]: [number, number], phi: number) {
+    ratio = ratio % (2 * Math.PI);
+    const rotMatrix = rotateMatrix(phi);
+    const [sX, sY] = addVector(
+        matrixTimes(rotMatrix, [
+            rx * Math.cos(position),
+            ry * Math.sin(position),
+        ]),
+        [cx, cy]
+    );
+    const [eX, eY] = addVector(
+        matrixTimes(rotMatrix, [
+            rx * Math.cos(position + ratio),
+            ry * Math.sin(position + ratio),
+        ]),
+        [cx, cy]
+    );
+    const fA = ratio > Math.PI ? 1 : 0;
+    const fS = ratio > 0 ? 1 : 0;
+    return {
+        startX: sX,
+        startY: sY,
+        endX: eX,
+        endY: eY,
+        path: `M${sX} ${sY} A ${[
+            rx,
+            ry,
+            (phi / (2 * Math.PI)) * 360,
+            fA,
+            fS,
+            eX,
+            eY,
+        ].join(" ")}`,
+    };
+}
+
+export function makeDonut({
+    series,
+    cx,
+    cy,
+    rx,
+    ry
+}: {
+    series: any,
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number
+}) {
+    if (!series) {
+        return {
+            ...series,
+            proportion: 0,
+            ratio: 0,
+            path: '',
+            startX: 0,
+            startY: 0,
+            endX: 0,
+            endY: 0,
+            center: {}
+        }
+    }
+    const sum = [...series]
+        .map(s => s.value)
+        .reduce((a, b) => a + b, 0)
+
+    const ratios = []
+
+    let acc = 0
+    for (let i = 0; i < series.length; i += 1) {
+        let proportion = series[i].value / sum;
+        const ratio = proportion * (Math.PI * 1.9999); // (Math.PI * 2) fails to display a donut with only one value > 0 as it goes full circle again
+        // midProportion & midRatio are used to find the midpoint of the arc to display markers
+        const midProportion = series[i].value / 2 / sum;
+        const midRatio = midProportion * (Math.PI * 2);
+        const { startX, startY, endX, endY, path } = createArc(
+            [cx, cy],
+            [rx, ry],
+            [acc, ratio],
+            105.25
+        );
+
+        ratios.push({
+            cx,
+            cy,
+            ...series[i],
+            proportion,
+            ratio: ratio,
+            path,
+            startX,
+            startY,
+            endX,
+            endY,
+            center: createArc(
+                [cx, cy],
+                [rx * 1.45, ry * 1.45],
+                [acc, midRatio],
+                105.25
+            ), // center of the arc, to display the marker. rx & ry are larger to be displayed with a slight offset
+        });
+        acc += ratio;
+    }
+    return ratios;
+}
+
+export function createDonutMarker({ drawingArea, element, offset }: { drawingArea: DrawingArea, element: any, offset: number }) {
+    const dx = drawingArea.centerX - element.center.endX;
+    const dy = drawingArea.centerY - element.center.endY;
+
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const endX = element.center.endX + (dx / length) * (length - offset);
+    const endY = element.center.endY + (dy / length) * (length - offset);
+
+    return {
+        x1: element.center.endX,
+        y1: element.center.endY,
+        x2: endX,
+        y2: endY
+    }
+}
+
+export function positionDonutLabel({ drawingArea, element, offset = 0 }: { drawingArea: DrawingArea, element: any, offset?: number }) {
+    let position = {
+        x: element.center.endX,
+        y: element.center.endY + offset,
+        textAnchor: "middle"
+    };
+
+    if (element.center.endX - 12 > drawingArea.centerX) {
+        position.textAnchor = "start";
+        position.x += 12;
+    }
+
+    if (element.center.endX + 12 < drawingArea.centerX) {
+        position.textAnchor = "end";
+        position.x -= 12;
+    }
+
+    if (element.center.endX === drawingArea.centerX) {
+        position.textAnchor = "middle";
+        if (element.center.endY > drawingArea.centerY) {
+            position.y += 12;
+        }
+        if (element.center.endY < drawingArea.centerY) {
+            position.y -= 12;
+        }
+    }
+
+    if (element.center.endY - 6 < (drawingArea.top + drawingArea.height / 4)) {
+        position.y = createDonutMarker({ drawingArea, element, offset: drawingArea.width / 3 }).y2 + offset;
+    }
+
+    if (element.center.endY + 6 > drawingArea.height - (drawingArea.height / 4)) {
+        position.y = createDonutMarker({ drawingArea, element, offset: drawingArea.width / 3 }).y2 + offset;
+    }
+
+    return position;
+}
+
+
 const utils_commons = {
+    calculateNiceScale,
+    createDonutMarker,
     createUid,
+    getClosestDecimal,
+    getMaxSerieLength,
     getMinMaxInDatasetItems,
     getSvgDimensions,
-    getMaxSerieLength,
-    getClosestDecimal,
-    calculateNiceScale,
-    ratioToMax
+    makeDonut,
+    positionDonutLabel,
+    ratioToMax,
 }
 
 export default utils_commons

@@ -563,7 +563,7 @@ export function chartXy({
 
         const legendWrapper = document.createElement('div');
         legendWrapper.classList.add('savyg-legend');
-        legendWrapper.setAttribute('style', `display:flex;align-items:center;justify-content:center;flex-direction:row;gap:12px;width:100%;height:100%;font-family:inherit;font-size:${userOptions.legendFontSize}px;overflow:visible`);
+        legendWrapper.setAttribute('style', `display:flex;align-items:center;justify-content:center;flex-direction:row;column-gap:12px;width:100%;height:100%;font-family:inherit;font-size:${userOptions.legendFontSize}px;overflow:visible`);
 
         formattedDataset.forEach(ds => {
             const legendItem = document.createElement('div');
@@ -591,6 +591,8 @@ export function chartXy({
 
             const legendLabel = document.createElement('span');
             legendLabel.style.maxWidth = 'calc(100% - 24px)'
+            legendLabel.style.whiteSpace = "nowrap"
+            legendLabel.style.color = userOptions.legendColor!
             legendLabel.innerHTML = ds.name!;
             [legendMarker, legendLabel].forEach(el => {
                 legendItem.appendChild(el);
@@ -634,8 +636,6 @@ export function chartXy({
     }
 
     function setTooltipCoordinates(event: any) {
-
-
         tooltipCoordinates.x = event.clientX
         tooltipCoordinates.y = event.clientY
         const tt = document.getElementById(tooltipId) as HTMLElement;
@@ -656,7 +656,6 @@ export function chartXy({
         if (event.clientY + tooltipRect.height > chartRect.bottom) {
             tt.style.top = String(tooltipCoordinates.y - tooltipRect.height - 48) + 'px'
         }
-
     }
 
     const tt = document.createElement('div');
