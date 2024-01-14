@@ -33,6 +33,7 @@ export type ChartXyOptions = {
     className?: string
     fontFamily?: string
     gridColor?: string
+    id?: string
     interactive?: boolean
     legendColor?: string
     legendFontSize?: number
@@ -130,7 +131,8 @@ export function chartXy({
     const chart = svg({
         options: {
             viewBox: userOptions.viewBox,
-            className: options?.className ?? ''
+            className: options?.className ?? '',
+            id: options?.id ?? ''
         }
     })
 

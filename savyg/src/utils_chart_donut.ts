@@ -18,6 +18,7 @@ export type ChartDonutOptions = {
     dataLabelsRoundingValue?: number
     donutThickness?: number
     fontFamily?: string
+    id?: string
     interactive?: boolean
     legendColor?: string
     legendFontSize?: number
@@ -104,6 +105,7 @@ export function chartDonut({
         options: {
             viewBox: userOptions.viewBox,
             className: options?.className ?? '',
+            id: options?.id ?? ''
         }
     })
 

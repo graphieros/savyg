@@ -1,7 +1,8 @@
 # savyg
 
-A savvy library to create svg elements and charts with ease.
 ![npm](https://img.shields.io/npm/v/savyg)
+
+A savvy library to create svg elements and charts with ease.
 
 SVG is awesome. But writing SVG on a low level can be tedious. This library is designed to make SVG coding more declarative and enjoyable.
 
@@ -122,8 +123,27 @@ circle({
         r: 5,
         fill: "red"
     },
-    parent: document.querySelector('#myDiv')
+    parent: document.querySelector('#mySvg')
 })
+
+```
+
+...or a rectangle, to be used later ?
+
+```
+import { rect } from "savyg";
+
+const myGreenRect = rect({
+    options: {
+        x: 0,
+        y: 0,
+        height: 10,
+        width: 10,
+        fill: "green"
+    }
+})
+
+alreadyDeclaredSvg.appendChild(myGreenRect)
 
 ```
 [check detailed SVG api here](https://savyg.graphieros.com/docs#svgapi)
