@@ -78,6 +78,12 @@ export type Path = StrokeOptions & CommonOptions & {
     fill?: string
 }
 
+export type GradientStop = {
+    offset: string
+    'stop-color': string
+    'stop-opacity'?: number
+}
+
 export type Stop = CommonOptions & {
     offset: string
     'stop-color': string

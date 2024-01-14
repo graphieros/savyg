@@ -1,4 +1,4 @@
-import { Coordinates, Shape, SvgItem, SvgOptions } from "./utils_svg_types"
+import { Coordinates, GradientStop, Shape, SvgItem, SvgOptions } from "./utils_svg_types"
 import { CONSTANT } from "./constants"
 
 /**
@@ -204,7 +204,7 @@ export function svg(attrs: {
 }
 
 export function linearGradient(attrs: {
-    stops: any,
+    stops: GradientStop[],
     parent?: HTMLElement | SVGElement
     id: string,
     direction: "vertical" | "horizontal",
@@ -258,7 +258,7 @@ export function radialGradient(attrs: {
     r?: string, // defaults to 50%
     gradientUnits?: "userSpaceOnUse" | "objectBoundingBox",
     spreadMethod?: "pad" | "reflect" | "repeat", // defaults to pad
-    stops: any,
+    stops: GradientStop[],
     parent?: HTMLElement | SVGElement,
     id: string,
 }) {

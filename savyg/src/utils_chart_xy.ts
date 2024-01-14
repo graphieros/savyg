@@ -1,4 +1,4 @@
-import { ChartArea, StrokeOptions, SvgItem } from "./utils_svg_types"
+import { ChartArea, GradientStop, StrokeOptions, SvgItem } from "./utils_svg_types"
 import { circle, element, line, linearGradient, path, rect, svg, text } from "./utils_svg";
 import { calculateNiceScale, createUid, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
 import { palette } from "./palette";
@@ -417,15 +417,15 @@ export function chartXy({
             const hasGradient = ds.gradientFrom && ds.gradientTo && ds.gradientDirection;
             const areaGradientId = ds.uid
             if (hasGradient) {
-                const stops = [
+                const stops: GradientStop[] = [
                     {
                         offset: "0%",
-                        'stop-color': ds.gradientFrom,
+                        'stop-color': ds.gradientFrom!,
                         'stop-opacity': 1
                     },
                     {
                         offset: "100%",
-                        'stop-color': ds.gradientTo,
+                        'stop-color': ds.gradientTo!,
                         'stop-opacity': 1
                     },
                 ]
@@ -478,27 +478,27 @@ export function chartXy({
         const barGradientPositiveId = ds.uid
         const barGradientNegativeId = createUid()
         if (hasGradient) {
-            const stopsPositive = [
+            const stopsPositive: GradientStop[] = [
                 {
                     offset: "0%",
-                    'stop-color': ds.gradientFrom,
+                    'stop-color': ds.gradientFrom!,
                     'stop-opacity': 1
                 },
                 {
                     offset: "100%",
-                    'stop-color': ds.gradientTo,
+                    'stop-color': ds.gradientTo!,
                     'stop-opacity': 1
                 },
             ]
-            const stopsNegative = [
+            const stopsNegative: GradientStop[] = [
                 {
                     offset: "0%",
-                    'stop-color': ds.gradientTo,
+                    'stop-color': ds.gradientTo!,
                     'stop-opacity': 1
                 },
                 {
                     offset: "100%",
-                    'stop-color': ds.gradientFrom,
+                    'stop-color': ds.gradientFrom!,
                     'stop-opacity': 1
                 },
             ]
