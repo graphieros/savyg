@@ -1,7 +1,7 @@
 import { circle, element, line, path, svg, text } from ".";
 import { palette } from "./palette";
 import { createUid, getSvgDimensions, makeDonut } from "./utils_common";
-import { ChartArea, DrawingArea, SvgItem, TextAnchor } from "./utils_svg_types";
+import { ChartArea, DrawingArea, ShapeRendering, SvgItem, TextAnchor } from "./utils_svg_types";
 
 export type ChartGaugeSegment = {
     from: number
@@ -31,6 +31,7 @@ export type ChartGaugeOptions = {
     pointerColor?: string
     pointerSize?: number
     pointerWidth?: number
+    "shape-rendering"?: ShapeRendering
     showDataLabels?: boolean
     showValue?: boolean
     title?: string
@@ -71,6 +72,7 @@ export function chartGauge({
         pointerColor: options?.pointerColor ?? '#2A2A2A',
         pointerSize: options?.pointerSize ?? 1,
         pointerWidth: options?.pointerWidth ?? 5,
+        "shape-rendering": options?.["shape-rendering"] ?? "auto",
         showDataLabels: options?.showDataLabels ?? true,
         showValue: options?.showValue ?? true,
         title: options?.title ?? '',
@@ -183,7 +185,8 @@ export function chartGauge({
                 stroke: arc.color,
                 "stroke-width": userOptions.arcThickness,
                 fill: "none",
-                className: `savyg-gauge-arc-path savyg-gauge-arc-path-${i}`
+                className: `savyg-gauge-arc-path savyg-gauge-arc-path-${i}`,
+                "shape-rendering": userOptions["shape-rendering"]
             },
             parent: segments
         })
@@ -203,7 +206,8 @@ export function chartGauge({
             "stroke-width": userOptions.pointerWidth,
             stroke: userOptions.pointerColor,
             "stroke-linecap": "round",
-            className: "savyg-gauge-pointer-arrow"
+            className: "savyg-gauge-pointer-arrow",
+            "shape-rendering": userOptions["shape-rendering"]
         },
         parent: pointer
     })
@@ -216,7 +220,8 @@ export function chartGauge({
             fill: userOptions.pointerBaseColor,
             stroke: userOptions.pointerBaseStroke,
             "stroke-width": userOptions.pointerBaseStrokeWidth,
-            className: "savyg-gauge-pointer-base"
+            className: "savyg-gauge-pointer-base",
+            "shape-rendering": userOptions["shape-rendering"]
         },
         parent: pointer
     })

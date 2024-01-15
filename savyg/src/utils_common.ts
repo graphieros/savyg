@@ -176,7 +176,6 @@ export function makeDonut({
     degrees?: number
     rotation?: number
 }) {
-    console.log({ piMult })
     if (!series) {
         return {
             ...series,

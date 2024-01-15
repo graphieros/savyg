@@ -1,7 +1,7 @@
 import { palette } from "./palette"
 import { createDonutMarker, createUid, getSvgDimensions, makeDonut, positionDonutLabel } from "./utils_common"
 import { circle, element, line, path, svg, text } from "./utils_svg"
-import { ChartArea, DrawingArea, StrokeOptions, SvgItem, TextAnchor } from "./utils_svg_types"
+import { ChartArea, DrawingArea, ShapeRendering, StrokeOptions, SvgItem, TextAnchor } from "./utils_svg_types"
 
 export type ChartDonutDatasetItem = StrokeOptions & {
     name: string
@@ -27,6 +27,7 @@ export type ChartDonutOptions = {
     paddingLeft?: number
     paddingRight?: number
     paddingTop?: number
+    "shape-rendering"?: ShapeRendering
     showDataLabels?: boolean
     showLegend?: boolean
     showTotal?: boolean,
@@ -84,6 +85,7 @@ export function chartDonut({
         paddingLeft: options?.paddingLeft ?? 0,
         paddingRight: options?.paddingRight ?? 0,
         paddingTop: options?.paddingTop ?? 96,
+        "shape-rendering": options?.["shape-rendering"] ?? "auto",
         showDataLabels: options?.showDataLabels ?? true,
         showLegend: options?.showLegend ?? true,
         showTotal: options?.showTotal ?? true,
@@ -192,6 +194,7 @@ export function chartDonut({
                     stroke: arc.color,
                     "stroke-width": 1,
                     id: `${globalUid}_marker_line_${i}`,
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: markers
             })
@@ -204,6 +207,7 @@ export function chartDonut({
                     r: 3,
                     stroke: "none",
                     id: `${globalUid}_marker_circle_${i}`,
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: markers
             })
@@ -313,7 +317,8 @@ export function chartDonut({
                 stroke: arc.color,
                 "stroke-width": userOptions.donutThickness,
                 fill: "none",
-                id: `${globalUid}_${i}`
+                id: `${globalUid}_${i}`,
+                "shape-rendering": userOptions["shape-rendering"]
             },
             parent: donutArcs
         })
@@ -406,7 +411,8 @@ export function chartDonut({
                     cx: 10,
                     cy: 10,
                     r: 9,
-                    fill: ds.color
+                    fill: ds.color,
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: legendMarker
             })

@@ -1,4 +1,4 @@
-import { ChartArea, GradientStop, StrokeOptions, SvgItem } from "./utils_svg_types"
+import { ChartArea, GradientStop, ShapeRendering, StrokeOptions, SvgItem } from "./utils_svg_types"
 import { circle, element, line, linearGradient, path, rect, svg, text } from "./utils_svg";
 import { calculateNiceScale, createUid, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
 import { palette } from "./palette";
@@ -42,6 +42,7 @@ export type ChartXyOptions = {
     paddingRight?: number
     paddingTop?: number
     selectorColor?: string
+    "shape-rendering"?: ShapeRendering
     showAxis?: boolean
     showGrid?: boolean
     showLegend?: boolean
@@ -109,6 +110,7 @@ export function chartXy({
         paddingRight: options?.paddingRight ?? 24,
         paddingTop: options?.paddingTop ?? 48,
         selectorColor: options?.selectorColor ?? '#00000010',
+        "shape-rendering": options?.["shape-rendering"] ?? "auto",
         showAxis: options?.showAxis ?? true,
         showGrid: options?.showGrid ?? true,
         showLegend: options?.showLegend ?? true,
@@ -211,6 +213,7 @@ export function chartXy({
                     stroke: userOptions.gridColor,
                     "stroke-linecap": "round",
                     "stroke-width": 0.6,
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: grid
             })
@@ -225,7 +228,8 @@ export function chartXy({
                     y2: chartArea.bottom,
                     stroke: userOptions.gridColor,
                     "stroke-linecap": "round",
-                    "stroke-width": 0.6
+                    "stroke-width": 0.6,
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: grid
             })
@@ -240,7 +244,8 @@ export function chartXy({
                 y1: chartArea.top,
                 y2: chartArea.bottom,
                 stroke: userOptions.axisColor,
-                "stroke-linecap": "round"
+                "stroke-linecap": "round",
+                "shape-rendering": userOptions["shape-rendering"]
             },
             parent: grid
         }) as SVGLineElement
@@ -252,7 +257,8 @@ export function chartXy({
                 y1: absoluteZero,
                 y2: absoluteZero,
                 stroke: userOptions.axisColor,
-                "stroke-linecap": "round"
+                "stroke-linecap": "round",
+                "shape-rendering": userOptions["shape-rendering"]
             },
             parent: grid
         }) as SVGLineElement
@@ -270,7 +276,8 @@ export function chartXy({
                     y1: normalizedValue,
                     y2: normalizedValue,
                     stroke: userOptions.axisColor,
-                    "stroke-linecap": "round"
+                    "stroke-linecap": "round",
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: grid
             })
@@ -336,6 +343,7 @@ export function chartXy({
                             "stroke-dashoffset": ds["stroke-dashoffset"]!,
                             "stroke-linecap": ds["stroke-linecap"],
                             "stroke-linejoin": ds["stroke-linejoin"],
+                            "shape-rendering": userOptions["shape-rendering"]
                         },
                         parent: g_plot_area_line
                     })
@@ -392,6 +400,7 @@ export function chartXy({
                     "stroke-dashoffset": ds["stroke-dashoffset"]!,
                     "stroke-linecap": ds["stroke-linecap"],
                     "stroke-linejoin": ds["stroke-linejoin"],
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: g_line
             })
@@ -458,6 +467,7 @@ export function chartXy({
                     "stroke-dashoffset": ds["stroke-dashoffset"]!,
                     "stroke-linecap": ds["stroke-linecap"],
                     "stroke-linejoin": ds["stroke-linejoin"],
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: g_area
             })
@@ -530,7 +540,8 @@ export function chartXy({
                     width: barSlot - userOptions.barSpacing! * 2,
                     fill: hasGradient ? (v ?? 0) > 0 ? `url(#${barGradientPositiveId})` : `url(#${barGradientNegativeId})` : ds.color,
                     rx: ds.rx ?? undefined,
-                    ry: ds.ry ?? undefined
+                    ry: ds.ry ?? undefined,
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: g_bar
             })
@@ -588,7 +599,8 @@ export function chartXy({
                     cx: 10,
                     cy: 10,
                     r: 9,
-                    fill: ds.gradientFrom && ds.gradientTo && ds.gradientDirection ? `url(#${ds.uid})` : ds.color
+                    fill: ds.gradientFrom && ds.gradientTo && ds.gradientDirection ? `url(#${ds.uid})` : ds.color,
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: legendMarker
             })
@@ -687,7 +699,8 @@ export function chartXy({
                     y: chartArea.top,
                     height: height - userOptions.paddingTop! - userOptions.paddingBottom!,
                     width: slot,
-                    fill: "transparent"
+                    fill: "transparent",
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: tooltip_traps
             })

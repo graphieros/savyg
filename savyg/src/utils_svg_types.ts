@@ -14,6 +14,8 @@ export enum SvgItem {
     TEXT = "text"
 }
 
+export type ShapeRendering = "auto" | "optimizeSpeed" | "crispEdges" | "geometricPrecision"
+
 export type CommonOptions = {
     className?: string
     content?: string
@@ -92,6 +94,7 @@ export type Path = StrokeOptions & CommonOptions & {
     d: string
     id?: string
     fill?: string
+    "shape-rendering"?: ShapeRendering
 }
 
 export type GradientStop = {
@@ -115,6 +118,7 @@ export type Rect = StrokeOptions & CommonOptions & {
     fill?: string
     rx?: number
     ry?: number
+    "shape-rendering"?: ShapeRendering
 }
 
 export type ForeignObject = CommonOptions & {
@@ -150,6 +154,7 @@ export type Polygon = StrokeOptions & CommonOptions & {
     id?: string
     points?: string
     fill?: string
+    "shape-rendering"?: ShapeRendering
 }
 
 export type Circle = StrokeOptions & CommonOptions & {
@@ -158,6 +163,7 @@ export type Circle = StrokeOptions & CommonOptions & {
     cy: number
     r: number
     fill?: string
+    "shape-rendering"?: ShapeRendering
 }
 
 export type Line = StrokeOptions & CommonOptions & {
@@ -166,6 +172,7 @@ export type Line = StrokeOptions & CommonOptions & {
     x2: number
     y1: number
     y2: number
+    "shape-rendering"?: ShapeRendering
 }
 
 export type ChartArea = {
