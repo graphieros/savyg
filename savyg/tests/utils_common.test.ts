@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax } from "../src/utils_common"
+import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax, positionDonutLabel, createDonutMarker } from "../src/utils_common"
 
 describe('getSvgDimensions', () => {
     test('parses dimensions of a string viewBox', () => {
@@ -91,5 +91,96 @@ describe('calculateNiceScale', () => {
 describe('ratioToMax', () => {
     test('returns a ratio', () => {
         expect(ratioToMax(4, 2)).toBe(2)
+    })
+})
+
+describe('positionDonutLabel', () => {
+    test('returns an ideal label position', () => {
+        const labelLeft = {
+            drawingArea: {
+                top: 0,
+                left: 0,
+                bottom: 100,
+                right: 100,
+                height: 100,
+                width: 100,
+                fullHeight: 100,
+                fullWidth: 100,
+                centerX: 50,
+                centerY: 50
+            },
+            element: {
+                center: {
+                    endX: 30,
+                    endY: 30,
+                }
+            }
+        }
+        expect(positionDonutLabel(labelLeft)).toStrictEqual({
+            x: 18,
+            y: 26.429773960448415,
+            textAnchor: "end"
+        })
+        const labelMiddle = {
+            drawingArea: { ...labelLeft.drawingArea },
+            element: {
+                center: {
+                    endX: 50,
+                    endY: 20
+                }
+            }
+
+        }
+        expect(positionDonutLabel(labelMiddle)).toStrictEqual({
+            x: 50,
+            y: 16.666666666666664,
+            textAnchor: "middle"
+        })
+        const labelRight = {
+            drawingArea: { ...labelLeft.drawingArea },
+            element: {
+                center: {
+                    endX: 80,
+                    endY: 70
+                }
+            }
+        }
+        expect(positionDonutLabel(labelRight)).toStrictEqual({
+            x: 92,
+            y: 68.49000654084097,
+            textAnchor: "start"
+        })
+    })
+})
+
+describe('createDonutMarker', () => {
+    test('returns marker coordinates', () => {
+        const label = {
+            drawingArea: {
+                top: 0,
+                left: 0,
+                bottom: 100,
+                right: 100,
+                height: 100,
+                width: 100,
+                fullHeight: 100,
+                fullWidth: 100,
+                centerX: 50,
+                centerY: 50
+            },
+            element: {
+                center: {
+                    endX: 30,
+                    endY: 30,
+                }
+            },
+            offset: 0
+        }
+        expect(createDonutMarker(label)).toStrictEqual({
+            x1: 30,
+            x2: 50,
+            y1: 30,
+            y2: 50
+        })
     })
 })

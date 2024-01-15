@@ -219,55 +219,28 @@ export function chartDonut({
         y: 0
     }
 
+    const selectionElements = [
+        { el: `${globalUid}_##`, s: 'savyg-arc-selected', u: 'savyg-arc-unselected' },
+        { el: `${globalUid}_marker_name_##`, s: 'savyg-marker-name-selected', u: 'savyg-marker-name-unselected' },
+        { el: `${globalUid}_marker_value_##`, s: 'savyg-marker-value-selected', u: 'savyg-marker-value-unselected' },
+        { el: `${globalUid}_marker_line_##`, s: 'savyg-marker-line-selected', u: 'savyg-marker-line-unselected' },
+        { el: `${globalUid}_marker_circle_##`, s: 'savyg-marker-circle-selected', u: 'savyg-marker-circle-unselected' }
+    ]
+
     function tooltip(index: number) {
         const tt = document.getElementById(tooltipId) as HTMLElement;
-
         for (let i = 0; i < formattedDataset.length; i += 1) {
-            if (i !== index) {
-                const arc = document.getElementById(`${globalUid}_${i}`)
-                if (arc) {
-                    arc.classList.add('savyg-arc-unselected')
+            selectionElements.forEach(o => {
+                const e = document.getElementById(o.el.replace("##", i + ''))
+                if (e) {
+                    if (i !== index) {
+                        e.classList.add(o.u)
+                    } else {
+                        e.classList.add(o.s)
+                    }
                 }
-                const markerTextName = document.getElementById(`${globalUid}_marker_name_${i}`)
-                if (markerTextName) {
-                    markerTextName.classList.add('savyg-marker-name-unselected')
-                }
-                const markerTextValue = document.getElementById(`${globalUid}_marker_value_${i}`)
-                if (markerTextValue) {
-                    markerTextValue.classList.add('savyg-marker-value-unselected')
-                }
-                const markerLine = document.getElementById(`${globalUid}_marker_line_${i}`)
-                if (markerLine) {
-                    markerLine.classList.add("savyg-marker-line-unselected")
-                }
-                const markerCircle = document.getElementById(`${globalUid}_marker_circle_${i}`)
-                if (markerCircle) {
-                    markerCircle.classList.add("savyg-marker-circle-unselected")
-                }
-            } else {
-                const arc = document.getElementById(`${globalUid}_${i}`)
-                if (arc) {
-                    arc.classList.add('savyg-arc-selected')
-                }
-                const markerTextName = document.getElementById(`${globalUid}_marker_name_${i}`)
-                if (markerTextName) {
-                    markerTextName.classList.add('savyg-marker-name-selected')
-                }
-                const markerTextValue = document.getElementById(`${globalUid}_marker_value_${i}`)
-                if (markerTextValue) {
-                    markerTextValue.classList.add('savyg-marker-value-selected')
-                }
-                const markerLine = document.getElementById(`${globalUid}_marker_line_${i}`)
-                if (markerLine) {
-                    markerLine.classList.add("savyg-marker-line-selected")
-                }
-                const markerCircle = document.getElementById(`${globalUid}_marker_circle_${i}`)
-                if (markerCircle) {
-                    markerCircle.classList.add("savyg-marker-circle-selected")
-                }
-            }
+            })
         }
-
 
         let html = '';
         html += `<div style="display:flex;flex-direction:row;gap:4px;align-items:center"><svg viewBox="0 0 20 20" height="14" width="14" style="margin-right:3px;margin-bottom:-1px"><circle cx="10" cy="10" r="9" fill="${formattedDataset[index].color}"/></svg><div>${formattedDataset[index].name ?? '-'}</div></div>`
@@ -279,31 +252,13 @@ export function chartDonut({
         const tt = document.getElementById(tooltipId);
 
         for (let i = 0; i < formattedDataset.length; i += 1) {
-            const arc = document.getElementById(`${globalUid}_${i}`)
-            if (arc) {
-                arc.classList.remove('savyg-arc-unselected')
-                arc.classList.remove('savyg-arc-selected')
-            }
-            const markerTextName = document.getElementById(`${globalUid}_marker_name_${i}`)
-            if (markerTextName) {
-                markerTextName.classList.remove('savyg-marker-name-unselected')
-                markerTextName.classList.remove('savyg-marker-name-selected')
-            }
-            const markerTextValue = document.getElementById(`${globalUid}_marker_value_${i}`)
-            if (markerTextValue) {
-                markerTextValue.classList.remove('savyg-marker-value-unselected')
-                markerTextValue.classList.remove('savyg-marker-value-selected')
-            }
-            const markerLine = document.getElementById(`${globalUid}_marker_line_${i}`)
-            if (markerLine) {
-                markerLine.classList.remove("savyg-marker-line-unselected")
-                markerLine.classList.remove("savyg-marker-line-selected")
-            }
-            const markerCircle = document.getElementById(`${globalUid}_marker_circle_${i}`)
-            if (markerCircle) {
-                markerCircle.classList.remove("savyg-marker-circle-unselected")
-                markerCircle.classList.remove("savyg-marker-circle-selected")
-            }
+            selectionElements.forEach(o => {
+                const e = document.getElementById(o.el.replace('##', i + ''))
+                if (e) {
+                    e.classList.remove(o.s)
+                    e.classList.remove(o.u)
+                }
+            })
         }
 
         tt!.setAttribute("style", "display:none");
