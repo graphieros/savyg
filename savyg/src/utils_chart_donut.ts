@@ -33,7 +33,7 @@ export type ChartDonutOptions = {
     title?: string;
     titleColor?: string
     titleFontSize?: number
-    titlePosition?: "start" | "middle" | "end"
+    titlePosition?: TextAnchor
     tooltipBackgroundColor?: string
     tooltipColor?: string
     totalLabel?: string
@@ -361,7 +361,8 @@ export function chartDonut({
                 "text-anchor": userOptions.titlePosition,
                 content: userOptions.title,
                 "font-weight": "bold",
-                fill: userOptions.titleColor!
+                fill: userOptions.titleColor!,
+                className: "savyg-title"
             },
             parent: chart
         })

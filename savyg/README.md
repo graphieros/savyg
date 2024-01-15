@@ -106,6 +106,37 @@ chartDonut({
 
 [check the docs](https://savyg.graphieros.com/docs#charts)
 
+Here is how you can create a gauge chart:
+
+```
+import { chartGauge } from "savyg";
+
+chartGauge({
+    value: 66.7,
+    segments: [
+        {
+            from: -100,
+            to: 0,
+            color: "red"
+        },
+        {
+            from: 0,
+            to: 100,
+            color: "green"
+        }
+    ],
+    // The HTML element where the chart will be inserted:
+    parent: document.querySelector('#myDiv'),
+    options: {
+        title: "Title",
+        valueRounding: 1
+    }
+})
+
+```
+
+[check the docs](https://savyg.graphieros.com/docs#charts)
+
 
 ## SVG api
 

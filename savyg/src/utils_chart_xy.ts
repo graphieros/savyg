@@ -183,7 +183,8 @@ export function chartXy({
                 "text-anchor": userOptions.titlePosition,
                 content: userOptions.title,
                 "font-weight": "bold",
-                fill: userOptions.titleColor
+                fill: userOptions.titleColor,
+                className: "savyg-title"
             },
             parent: chart
         })

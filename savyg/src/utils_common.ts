@@ -117,8 +117,8 @@ export function matrixTimes([[a, b], [c, d]]: any, [x, y]: [number, number]) {
     return [a * x + b * y, c * x + d * y];
 }
 
-export function createArc([cx, cy]: any, [rx, ry]: any, [position, ratio]: [number, number], phi: number) {
-    ratio = ratio % (2 * Math.PI);
+export function createArc([cx, cy]: any, [rx, ry]: any, [position, ratio]: [number, number], phi: number, degrees: number = 360, piMult = 2) {
+    ratio = ratio % (piMult * Math.PI);
     const rotMatrix = rotateMatrix(phi);
     const [sX, sY] = addVector(
         matrixTimes(rotMatrix, [
@@ -144,7 +144,7 @@ export function createArc([cx, cy]: any, [rx, ry]: any, [position, ratio]: [numb
         path: `M${sX} ${sY} A ${[
             rx,
             ry,
-            (phi / (2 * Math.PI)) * 360,
+            (phi / (piMult * Math.PI)) * degrees,
             fA,
             fS,
             eX,
@@ -158,14 +158,25 @@ export function makeDonut({
     cx,
     cy,
     rx,
-    ry
+    ry,
+    piProportion = 1.99999,
+    piMult = 2,
+    arcAmpl = 1.45,
+    degrees = 360,
+    rotation = 105.25
 }: {
     series: any,
     cx: number,
     cy: number,
     rx: number,
-    ry: number
+    ry: number,
+    piProportion?: number,
+    piMult?: number,
+    arcAmpl?: number
+    degrees?: number
+    rotation?: number
 }) {
+    console.log({ piMult })
     if (!series) {
         return {
             ...series,
@@ -188,15 +199,16 @@ export function makeDonut({
     let acc = 0
     for (let i = 0; i < series.length; i += 1) {
         let proportion = series[i].value / sum;
-        const ratio = proportion * (Math.PI * 1.9999); // (Math.PI * 2) fails to display a donut with only one value > 0 as it goes full circle again
-        // midProportion & midRatio are used to find the midpoint of the arc to display markers
+        const ratio = proportion * (Math.PI * piProportion);
         const midProportion = series[i].value / 2 / sum;
-        const midRatio = midProportion * (Math.PI * 2);
+        const midRatio = midProportion * (Math.PI * piMult);
         const { startX, startY, endX, endY, path } = createArc(
             [cx, cy],
             [rx, ry],
             [acc, ratio],
-            105.25
+            rotation,
+            degrees,
+            piMult
         );
 
         ratios.push({
@@ -212,9 +224,11 @@ export function makeDonut({
             endY,
             center: createArc(
                 [cx, cy],
-                [rx * 1.45, ry * 1.45],
+                [rx * arcAmpl, ry * arcAmpl],
                 [acc, midRatio],
-                105.25
+                rotation,
+                degrees,
+                piMult
             ), // center of the arc, to display the marker. rx & ry are larger to be displayed with a slight offset
         });
         acc += ratio;

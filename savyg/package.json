@@ -1,7 +1,7 @@
 {
   "name": "savyg",
   "private": false,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A savvy library to create svg elements and charts with ease",
   "author": "Alec Lloyd Probert",
   "repository": {
@@ -21,7 +21,9 @@
     "rect",
     "polygon",
     "foreignObject",
-    "framework agnostic"
+    "framework agnostic",
+    "donut",
+    "gauge"
   ],
   "files": [
     "dist"

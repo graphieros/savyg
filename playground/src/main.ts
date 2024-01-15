@@ -1,7 +1,40 @@
-import { chartXy, radialGradient, svg, circle, chartDonut } from "savyg";
+import { chartXy, radialGradient, svg, circle, chartDonut, chartGauge } from "savyg";
 
 // const parent = document.getElementById("svg") as HTMLElement
 const div = document.getElementById("div") as HTMLElement
+
+chartGauge({
+  dataset: {
+    value: 4.56,
+    segments: [
+      {
+        from: 0,
+        to: 1
+      },
+      {
+        from: 1,
+        to: 2
+      },
+      {
+        from: 2,
+        to: 3
+      },
+      {
+        from: 3,
+        to: 4
+      },
+      {
+        from: 4,
+        to: 5
+      }
+    ]
+  },
+  options: {
+    title: "Title",
+    valueRounding: 1
+  },
+  parent: div
+})
 
 chartXy({
   dataset: [
