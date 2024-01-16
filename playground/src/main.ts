@@ -31,7 +31,30 @@ chartGauge({
   },
   options: {
     title: "Title",
-    valueRounding: 1
+    valueRounding: 1,
+  },
+  parent: div
+})
+chartGauge({
+  dataset: {
+    value: 4.56,
+    segments: [
+      {
+        from: -100,
+        to: 0
+      },
+      {
+        from: 0,
+        to: 100
+      },
+    ]
+  },
+  options: {
+    title: "Title",
+    valueRounding: 1,
+    arcThickness: 12,
+    pointerSize: 0.8,
+    dataLabelsOffset: 1.2
   },
   parent: div
 })

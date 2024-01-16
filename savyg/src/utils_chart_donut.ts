@@ -1,5 +1,5 @@
 import { palette } from "./palette"
-import { createDonutMarker, createUid, getSvgDimensions, makeDonut, positionDonutLabel } from "./utils_common"
+import { createDonutMarker, createUid, fordinum, getSvgDimensions, makeDonut, positionDonutLabel } from "./utils_common"
 import { circle, element, line, path, svg, text } from "./utils_svg"
 import { ChartArea, DrawingArea, ShapeRendering, StrokeOptions, SvgItem, TextAnchor } from "./utils_svg_types"
 
@@ -179,7 +179,7 @@ export function chartDonut({
                     fill: userOptions.dataLabelsColor!,
                     "font-size": userOptions.dataLabelsFontSize!,
                     "text-anchor": percentagePosition.textAnchor as TextAnchor,
-                    content: `${Number((arc.proportion * 100).toFixed(userOptions.dataLabelsRoundingPercentage)).toLocaleString()}% (${Number(arc.value.toFixed(userOptions.dataLabelsRoundingValue)).toLocaleString()})`,
+                    content: `${fordinum(arc.proportion * 100, userOptions.dataLabelsRoundingPercentage, '%')} (${fordinum(arc.value, userOptions.dataLabelsRoundingValue)})`,
                     id: `${globalUid}_marker_value_${i}`,
                 },
                 parent: markers
@@ -248,7 +248,7 @@ export function chartDonut({
 
         let html = '';
         html += `<div style="display:flex;flex-direction:row;gap:4px;align-items:center"><svg viewBox="0 0 20 20" height="14" width="14" style="margin-right:3px;margin-bottom:-1px"><circle cx="10" cy="10" r="9" fill="${formattedDataset[index].color}"/></svg><div>${formattedDataset[index].name ?? '-'}</div></div>`
-        html += `<div>${Number((formattedDataset[index].value / grandTotal * 100).toFixed(userOptions.dataLabelsRoundingPercentage)).toLocaleString()}% (${Number(formattedDataset[index].value.toFixed(userOptions.dataLabelsRoundingValue)).toLocaleString()})</div>`
+        html += `<div>${fordinum(formattedDataset[index].value / grandTotal * 100, userOptions.dataLabelsRoundingPercentage, '%')} (${fordinum(formattedDataset[index].value, userOptions.dataLabelsRoundingValue)})</div>`
         tt!.innerHTML = html;
     }
 
@@ -348,7 +348,7 @@ export function chartDonut({
                 x: width / 2,
                 y: height / 2 + userOptions.totalValueFontSize!,
                 "font-size": userOptions.totalValueFontSize,
-                content: Number(grandTotal.toFixed(userOptions.totalValueRounding)).toLocaleString(),
+                content: fordinum(grandTotal, userOptions.totalValueRounding),
                 "text-anchor": "middle",
                 fill: userOptions.totalLabelColor
             },

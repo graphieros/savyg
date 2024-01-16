@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax, positionDonutLabel, createDonutMarker } from "../src/utils_common"
+import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax, positionDonutLabel, createDonutMarker, fordinum } from "../src/utils_common"
 
 describe('getSvgDimensions', () => {
     test('parses dimensions of a string viewBox', () => {
@@ -182,5 +182,23 @@ describe('createDonutMarker', () => {
             y1: 30,
             y2: 50
         })
+    })
+})
+
+describe('fordinum', () => {
+    test('returns a formatted number to rounded text format', () => {
+        expect(fordinum(1)).toBe("1")
+        expect(fordinum(1.5)).toBe("2")
+        expect(fordinum(-1)).toBe("-1")
+        expect(fordinum(-1.5)).toBe("-2")
+    })
+    test('returns its identity if NaN', () => {
+        expect(fordinum('text' as unknown as number)).toBe('text')
+    })
+    test("returns a number with an expected rounding", () => {
+        expect(fordinum(1.618, 3)).toBe("1.618")
+    })
+    test("returns a number with prefix and suffix", () => {
+        expect(fordinum(1, 0, '_suffix', 'prefix_')).toBe('prefix_1_suffix')
     })
 })

@@ -289,11 +289,16 @@ export function positionDonutLabel({ drawingArea, element, offset = 0 }: { drawi
     return position;
 }
 
+export function fordinum(n: number, r: number = 0, s: string = '', p: string = ''): string {
+    if (isNaN(n)) return n as unknown as string
+    return p + (Number(n).toFixed(r)).toLocaleString() + s
+}
 
 const utils_commons = {
     calculateNiceScale,
     createDonutMarker,
     createUid,
+    fordinum,
     getClosestDecimal,
     getMaxSerieLength,
     getMinMaxInDatasetItems,

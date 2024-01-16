@@ -1,6 +1,6 @@
 import { ChartArea, GradientStop, ShapeRendering, StrokeOptions, SvgItem } from "./utils_svg_types"
 import { circle, element, line, linearGradient, path, rect, svg, text } from "./utils_svg";
-import { calculateNiceScale, createUid, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
+import { calculateNiceScale, createUid, fordinum, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
 import { palette } from "./palette";
 
 // TODO: add descriptions for types
@@ -355,7 +355,7 @@ export function chartXy({
                                 y: normalize(value) - (ds.dataLabelsFontSize! / 2) + ds.dataLabelOffsetY,
                                 "text-anchor": "middle",
                                 "font-size": ds.dataLabelsFontSize,
-                                content: Number(value.toFixed(ds.rounding)).toLocaleString(),
+                                content: fordinum(value, ds.rounding),
                                 fill: ds.dataLabelsColor
                             },
                             parent: g_plot_area_line
@@ -552,7 +552,7 @@ export function chartXy({
                         y: normalize(v ?? 0) + ((v ?? 0) < 0 ? ds.dataLabelsFontSize + ds.dataLabelOffsetY : (-ds.dataLabelsFontSize / 2 - ds.dataLabelOffsetY)),
                         "text-anchor": "middle",
                         "font-size": ds.dataLabelsFontSize,
-                        content: Number((v ?? 0).toFixed(ds.rounding)).toLocaleString(),
+                        content: fordinum(v ?? 0, ds.rounding),
                         fill: ds.dataLabelsColor
                     },
                     parent: g_bar
@@ -639,7 +639,7 @@ export function chartXy({
             html += `<div>${options.xAxisLabels![index]}</div>`;
         }
         formattedDataset.forEach(ds => {
-            html += `<div style="min-width:0; display:flex; flex-direction:row;gap:4px;align-items:center;"><div><svg viewBox="0 0 20 20" height="14" width="14" style="margin-right:3px;margin-bottom:-1px"><circle cx="10" cy="10" r="9" fill="${ds.gradientFrom && ds.gradientTo && ds.gradientDirection ? `url(#${ds.uid})` : ds.color}"/></svg><span>${ds.name}</span> : <b>${[undefined, null].includes(ds.values[index] as any) ? '-' : Number(ds.values[index]?.toFixed(ds.rounding)).toLocaleString()}</b></div></div>`
+            html += `<div style="min-width:0; display:flex; flex-direction:row;gap:4px;align-items:center;"><div><svg viewBox="0 0 20 20" height="14" width="14" style="margin-right:3px;margin-bottom:-1px"><circle cx="10" cy="10" r="9" fill="${ds.gradientFrom && ds.gradientTo && ds.gradientDirection ? `url(#${ds.uid})` : ds.color}"/></svg><span>${ds.name}</span> : <b>${[undefined, null].includes(ds.values[index] as any) ? '-' : fordinum(ds.values[index] ?? 0, ds.rounding)}</b></div></div>`
         })
         tt!.innerHTML = html;
     }

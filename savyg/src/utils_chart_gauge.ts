@@ -1,6 +1,6 @@
 import { circle, element, line, path, svg, text } from ".";
 import { palette } from "./palette";
-import { createUid, getSvgDimensions, makeDonut } from "./utils_common";
+import { createUid, getSvgDimensions, makeDonut, fordinum } from "./utils_common";
 import { ChartArea, DrawingArea, ShapeRendering, SvgItem, TextAnchor } from "./utils_svg_types";
 
 export type ChartGaugeSegment = {
@@ -18,6 +18,7 @@ export type ChartGaugeOptions = {
     arcThickness?: number
     backgroundColor?: string
     className?: string
+    dataLabelsOffset?: number,
     fontFamily?: string
     id?: string
     paddingBottom?: number
@@ -60,6 +61,7 @@ export function chartGauge({
     const userOptions: ChartGaugeOptions = {
         arcThickness: options?.arcThickness ?? 58,
         backgroundColor: options?.backgroundColor ?? '#FFFFFF',
+        dataLabelsOffset: options?.dataLabelsOffset ?? 1.4,
         fontFamily: options?.fontFamily ?? "inherit",
         paddingBottom: options?.paddingBottom ?? 0,
         paddingLeft: options?.paddingLeft ?? 0,
@@ -147,14 +149,14 @@ export function chartGauge({
 
     const formattedDataset = {
         value: dataset.value,
-        segments: dataset.segments.map((s, i) => {
+        segments: [...dataset.segments.map((s, i) => {
             return {
                 ...s,
                 id: `${globalUid}_segment_${i}`,
                 color: s.color ?? palette[i],
                 value: ((s.to - s.from) / minMax.max) * 100
             }
-        })
+        }), { color: 'transparent', value: 0, from: dataset.segments[dataset.segments.length - 1].to, to: dataset.segments[dataset.segments.length - 1].to }]
     }
 
     const segments = element({
@@ -173,7 +175,7 @@ export function chartGauge({
         ry: width / 4,
         piProportion: 1,
         piMult: 1,
-        arcAmpl: 1.4,
+        arcAmpl: userOptions.dataLabelsOffset,
         degrees: 180,
         rotation: Math.PI
     })
@@ -245,7 +247,7 @@ export function chartGauge({
     }
 
     if (userOptions.showDataLabels) {
-        arcs.forEach((arc: { center: { startX: number; startY: number; }; from: number; to: number; endX: number; endY: number }, i: number) => {
+        arcs.forEach((arc: { center: { startX: number; startY: number; }; from: number; to: number; endX: number; endY: number }) => {
             text({
                 options: {
                     x: arc.center.startX,
@@ -258,20 +260,20 @@ export function chartGauge({
                 },
                 parent: dataLabels
             })
-            if (i === arcs.length - 1) {
-                text({
-                    options: {
-                        x: arc.endX + (userOptions.arcThickness! / 1.3),
-                        y: arc.endY,
-                        "font-size": 12,
-                        fill: "black",
-                        content: String(arc.to),
-                        "text-anchor": getDataLabelTextAnchor(arc.endX),
-                        className: "savyg-gauge-data-label"
-                    },
-                    parent: dataLabels
-                })
-            }
+            // if (i === arcs.length - 1) {
+            //     text({
+            //         options: {
+            //             x: arc.endX + (userOptions.arcThickness! / 1.3),
+            //             y: arc.endY,
+            //             "font-size": 12,
+            //             fill: "black",
+            //             content: String(arc.to),
+            //             "text-anchor": getDataLabelTextAnchor(arc.endX),
+            //             className: "savyg-gauge-data-label"
+            //         },
+            //         parent: dataLabels
+            //     })
+            // }
         })
     }
 
@@ -296,7 +298,7 @@ export function chartGauge({
             options: {
                 x: width / 2,
                 y: drawingArea.centerY + height / 4 + userOptions.valueFontSize! * 2,
-                content: Number(dataset.value.toFixed(userOptions.valueRounding)).toLocaleString(), // this is a pain in the neck and should be a utils
+                content: fordinum(dataset.value, userOptions.valueRounding),
                 fill: userOptions.valueColor,
                 "font-weight": userOptions.valueFontWeight,
                 "font-size": userOptions.valueFontSize,
