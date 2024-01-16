@@ -18,6 +18,8 @@ export type ChartGaugeOptions = {
     arcThickness?: number
     backgroundColor?: string
     className?: string
+    dataLabelsColor?: string
+    dataLabelsFontSize?: number
     dataLabelsOffset?: number,
     fontFamily?: string
     id?: string
@@ -61,6 +63,8 @@ export function chartGauge({
     const userOptions: ChartGaugeOptions = {
         arcThickness: options?.arcThickness ?? 58,
         backgroundColor: options?.backgroundColor ?? '#FFFFFF',
+        dataLabelsColor: options?.dataLabelsColor ?? "#000000",
+        dataLabelsFontSize: options?.dataLabelsFontSize ?? 12,
         dataLabelsOffset: options?.dataLabelsOffset ?? 1.4,
         fontFamily: options?.fontFamily ?? "inherit",
         paddingBottom: options?.paddingBottom ?? 0,
@@ -252,28 +256,14 @@ export function chartGauge({
                 options: {
                     x: arc.center.startX,
                     y: arc.center.startY,
-                    "font-size": 12,
-                    fill: "black",
+                    "font-size": userOptions.dataLabelsFontSize,
+                    fill: userOptions.dataLabelsColor,
                     content: String(arc.from),
                     "text-anchor": getDataLabelTextAnchor(arc.center.startX),
                     className: "savyg-gauge-data-label"
                 },
                 parent: dataLabels
             })
-            // if (i === arcs.length - 1) {
-            //     text({
-            //         options: {
-            //             x: arc.endX + (userOptions.arcThickness! / 1.3),
-            //             y: arc.endY,
-            //             "font-size": 12,
-            //             fill: "black",
-            //             content: String(arc.to),
-            //             "text-anchor": getDataLabelTextAnchor(arc.endX),
-            //             className: "savyg-gauge-data-label"
-            //         },
-            //         parent: dataLabels
-            //     })
-            // }
         })
     }
 
