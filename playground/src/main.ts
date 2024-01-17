@@ -84,6 +84,7 @@ chartXy({
     showAxis: true,
     xAxisLabels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
     title: "Title",
+    zoomColor: "#0000FF10"
   }
 })
 

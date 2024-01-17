@@ -59,6 +59,7 @@ export type ChartXyOptions = {
     xAxisLabelsOffsetY?: number
     yAxisLabelsColor?: string
     yAxisLabelsFontSize?: number
+    zoomColor?: string
 }
 
 export function chartXy({
@@ -126,6 +127,7 @@ export function chartXy({
         xAxisLabelsOffsetY: options?.xAxisLabelsOffsetY ?? 0,
         yAxisLabelsColor: options?.yAxisLabelsColor ?? '#000000',
         yAxisLabelsFontSize: options?.yAxisLabelsFontSize ?? 12,
+        zoomColor: options?.zoomColor ?? '#00FF0010'
     }
 
     const globalUid = createUid();
@@ -153,27 +155,60 @@ export function chartXy({
         bottom: height - userOptions.paddingBottom!
     }
 
+    let isZooming = false;
+    let selectedTraps: number[] = [];
+
     // --- DATA
 
-    const { min, max } = getMinMaxInDatasetItems(dataset)
-    const { maxSeriesLength } = getMaxSerieLength(dataset)
+    let { maxSeriesLength } = getMaxSerieLength(dataset)
+    const zoom = {
+        start: 0,
+        end: maxSeriesLength
+    }
+
+    function mutateMaxSeriesLength() {
+        maxSeriesLength = getMaxSerieLength(dataset, zoom).maxSeriesLength
+    }
+
+    let min: number, max: number;
+
+    function calculateMinMax() {
+        min = getMinMaxInDatasetItems(dataset, zoom).min
+        max = getMinMaxInDatasetItems(dataset, zoom).max
+        console.log({ min, max })
+    }
+
+    calculateMinMax()
 
     // ------ * Bounds
 
-    const bounds = {
-        min: calculateNiceScale(min, max, 10).min,
-        max: calculateNiceScale(min, max, 10).max,
-        ticks: calculateNiceScale(min, max, 10).ticks
+    let bounds: { min: number; max: number; ticks: number[] };
+
+    function calculateBounds() {
+        bounds = {
+            min: calculateNiceScale(min, max, 10).min,
+            max: calculateNiceScale(min, max, 10).max,
+            ticks: calculateNiceScale(min, max, 10).ticks
+        }
     }
+
+    calculateBounds();
 
     function normalize(val: number) {
         return chartArea.bottom - ((height - userOptions.paddingBottom! - userOptions.paddingTop!) * ratioToMax(val + absoluteMin, absoluteMax))
     }
 
-    const absoluteMin = Math.abs(bounds.min);
-    const absoluteMax = Math.abs(bounds.max + absoluteMin)
-    const absoluteZero = chartArea.bottom - ((height - userOptions.paddingBottom! - userOptions.paddingTop!) * ratioToMax(absoluteMin, absoluteMax))
-    const slot = (width - chartArea.left - userOptions.paddingRight!) / maxSeriesLength;
+    let absoluteMin: number, absoluteMax: number, absoluteZero: number, slot: number;
+
+    function calculateAbsolutes() {
+        absoluteMin = Math.abs(bounds.min);
+        absoluteMax = Math.abs(bounds.max + absoluteMin)
+        absoluteZero = chartArea.bottom - ((height - userOptions.paddingBottom! - userOptions.paddingTop!) * ratioToMax(absoluteMin, absoluteMax))
+        slot = (width - chartArea.left - userOptions.paddingRight!) / maxSeriesLength;
+        console.log({ slot })
+    }
+
+    calculateAbsolutes();
 
     // TITLE
 
@@ -201,116 +236,120 @@ export function chartXy({
         parent: chart
     })
 
-    if (userOptions.showGrid) {
-        bounds.ticks.forEach(tick => {
-            const normalizedValue = normalize(tick);
-            line({
+    function drawGrid() {
+        if (userOptions.showGrid) {
+            grid.innerHTML = "";
+            bounds.ticks.forEach(tick => {
+                const normalizedValue = normalize(tick);
+                line({
+                    options: {
+                        x1: chartArea.left,
+                        x2: chartArea.right,
+                        y1: normalizedValue,
+                        y2: normalizedValue,
+                        stroke: userOptions.gridColor,
+                        "stroke-linecap": "round",
+                        "stroke-width": 0.6,
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: grid
+                })
+            })
+
+            for (let i = 1; i <= maxSeriesLength; i += 1) {
+                line({
+                    options: {
+                        x1: chartArea.left + (slot * i),
+                        x2: chartArea.left + (slot * i),
+                        y1: chartArea.top,
+                        y2: chartArea.bottom,
+                        stroke: userOptions.gridColor,
+                        "stroke-linecap": "round",
+                        "stroke-width": 0.6,
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: grid
+                })
+            }
+        }
+
+        if (userOptions.showAxis) {
+            const yAxis = line({
                 options: {
                     x1: chartArea.left,
-                    x2: chartArea.right,
-                    y1: normalizedValue,
-                    y2: normalizedValue,
-                    stroke: userOptions.gridColor,
-                    "stroke-linecap": "round",
-                    "stroke-width": 0.6,
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: grid
-            })
-        })
-
-        for (let i = 1; i <= maxSeriesLength; i += 1) {
-            line({
-                options: {
-                    x1: chartArea.left + (slot * i),
-                    x2: chartArea.left + (slot * i),
+                    x2: chartArea.left,
                     y1: chartArea.top,
                     y2: chartArea.bottom,
-                    stroke: userOptions.gridColor,
-                    "stroke-linecap": "round",
-                    "stroke-width": 0.6,
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: grid
-            })
-        }
-    }
-
-    if (userOptions.showAxis) {
-        const yAxis = line({
-            options: {
-                x1: chartArea.left,
-                x2: chartArea.left,
-                y1: chartArea.top,
-                y2: chartArea.bottom,
-                stroke: userOptions.axisColor,
-                "stroke-linecap": "round",
-                "shape-rendering": userOptions["shape-rendering"]
-            },
-            parent: grid
-        }) as SVGLineElement
-
-        const xAxis = line({
-            options: {
-                x1: chartArea.left,
-                x2: chartArea.right,
-                y1: absoluteZero,
-                y2: absoluteZero,
-                stroke: userOptions.axisColor,
-                "stroke-linecap": "round",
-                "shape-rendering": userOptions["shape-rendering"]
-            },
-            parent: grid
-        }) as SVGLineElement
-
-        [xAxis, yAxis].forEach(axis => axis.dataset.savyg = "axis")
-
-        // --- Y AXIS TICKS
-
-        bounds.ticks.forEach(tick => {
-            const normalizedValue = normalize(tick);
-            line({
-                options: {
-                    x1: chartArea.left,
-                    x2: chartArea.left - 5,
-                    y1: normalizedValue,
-                    y2: normalizedValue,
                     stroke: userOptions.axisColor,
                     "stroke-linecap": "round",
                     "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: grid
-            })
+            }) as SVGLineElement
 
-            text({
+            const xAxis = line({
                 options: {
-                    x: chartArea.left - 7,
-                    y: normalizedValue + userOptions.yAxisLabelsFontSize! / 3,
-                    "text-anchor": "end",
-                    "font-size": userOptions.yAxisLabelsFontSize,
-                    content: String(tick),
-                    fill: userOptions.yAxisLabelsColor
+                    x1: chartArea.left,
+                    x2: chartArea.right,
+                    y1: absoluteZero,
+                    y2: absoluteZero,
+                    stroke: userOptions.axisColor,
+                    "stroke-linecap": "round",
+                    "shape-rendering": userOptions["shape-rendering"]
                 },
                 parent: grid
-            })
-        })
+            }) as SVGLineElement
 
-        // --- X AXIS LABELS
-        if (options?.xAxisLabels && options.xAxisLabels.length) {
-            for (let i = 0; i < maxSeriesLength; i += 1) {
-                const xLabel = options.xAxisLabels[i];
-                if (xLabel) {
-                    text({
-                        options: {
-                            x: chartArea.left + (slot * i) + (slot / 2),
-                            y: chartArea.bottom + userOptions.xAxisLabelsFontSize! + userOptions.xAxisLabelsOffsetY!,
-                            content: xLabel,
-                            "text-anchor": "middle",
-                            "font-size": userOptions.xAxisLabelsFontSize,
-                            fill: userOptions.xAxisLabelsColor
-                        },
-                        parent: grid
-                    })
+            [xAxis, yAxis].forEach(axis => axis.dataset.savyg = "axis")
+
+            // --- Y AXIS TICKS
+
+            bounds.ticks.forEach(tick => {
+                const normalizedValue = normalize(tick);
+                line({
+                    options: {
+                        x1: chartArea.left,
+                        x2: chartArea.left - 5,
+                        y1: normalizedValue,
+                        y2: normalizedValue,
+                        stroke: userOptions.axisColor,
+                        "stroke-linecap": "round",
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: grid
+                })
+
+                text({
+                    options: {
+                        x: chartArea.left - 7,
+                        y: normalizedValue + userOptions.yAxisLabelsFontSize! / 3,
+                        "text-anchor": "end",
+                        "font-size": userOptions.yAxisLabelsFontSize,
+                        content: String(tick),
+                        fill: userOptions.yAxisLabelsColor
+                    },
+                    parent: grid
+                })
+            })
+
+            // --- X AXIS LABELS
+            if (options?.xAxisLabels && options.xAxisLabels.length) {
+                const labels = options.xAxisLabels.filter((_l, i) => i >= zoom.start && i <= zoom.end)
+                for (let i = 0; i < labels.length; i += 1) {
+                    const xLabel = labels[i];
+                    if (xLabel) {
+                        text({
+                            options: {
+                                x: chartArea.left + (slot * i) + (slot / 2),
+                                y: chartArea.bottom + userOptions.xAxisLabelsFontSize! + userOptions.xAxisLabelsOffsetY!,
+                                content: xLabel,
+                                "text-anchor": "middle",
+                                "font-size": userOptions.xAxisLabelsFontSize,
+                                fill: userOptions.xAxisLabelsColor
+                            },
+                            parent: grid
+                        })
+                    }
                 }
             }
         }
@@ -327,44 +366,49 @@ export function chartXy({
     })
     const plotAndLineDatasets = formattedDataset.filter(ds => ["plot", "line", "area"].includes(ds.type!))
 
-    plotAndLineDatasets.forEach(ds => {
-        if (ds.values.length) {
-            ds.values.forEach((value, i) => {
-                if (value !== null) {
-                    circle({
-                        options: {
-                            r: ds.plotRadius!,
-                            cx: chartArea.left + (slot * i) + (slot / 2),
-                            cy: normalize(value),
-                            fill: ds.color,
-                            stroke: ds.stroke,
-                            "stroke-width": ds["stroke-width"],
-                            "stroke-dasharray": ds["stroke-dasharray"]!,
-                            "stroke-dashoffset": ds["stroke-dashoffset"]!,
-                            "stroke-linecap": ds["stroke-linecap"],
-                            "stroke-linejoin": ds["stroke-linejoin"],
-                            "shape-rendering": userOptions["shape-rendering"]
-                        },
-                        parent: g_plot_area_line
-                    })
-
-                    if (ds.showDataLabels) {
-                        text({
+    function drawPlotsAndLines() {
+        g_plot_area_line.innerHTML = ""
+        plotAndLineDatasets.forEach(ds => {
+            if (ds.values.length) {
+                ds.values.filter((_, i) => i >= zoom.start && i <= zoom.end).forEach((value, i) => {
+                    if (value !== null) {
+                        circle({
                             options: {
-                                x: chartArea.left + (slot * i) + (slot / 2),
-                                y: normalize(value) - (ds.dataLabelsFontSize! / 2) + ds.dataLabelOffsetY,
-                                "text-anchor": "middle",
-                                "font-size": ds.dataLabelsFontSize,
-                                content: fordinum(value, ds.rounding),
-                                fill: ds.dataLabelsColor
+                                r: ds.plotRadius!,
+                                cx: chartArea.left + (slot * i) + (slot / 2),
+                                cy: normalize(value),
+                                fill: ds.color,
+                                stroke: ds.stroke,
+                                "stroke-width": ds["stroke-width"],
+                                "stroke-dasharray": ds["stroke-dasharray"]!,
+                                "stroke-dashoffset": ds["stroke-dashoffset"]!,
+                                "stroke-linecap": ds["stroke-linecap"],
+                                "stroke-linejoin": ds["stroke-linejoin"],
+                                "shape-rendering": userOptions["shape-rendering"]
                             },
                             parent: g_plot_area_line
                         })
+
+                        if (ds.showDataLabels) {
+                            text({
+                                options: {
+                                    x: chartArea.left + (slot * i) + (slot / 2),
+                                    y: normalize(value) - (ds.dataLabelsFontSize! / 2) + ds.dataLabelOffsetY,
+                                    "text-anchor": "middle",
+                                    "font-size": ds.dataLabelsFontSize,
+                                    content: fordinum(value, ds.rounding),
+                                    fill: ds.dataLabelsColor
+                                },
+                                parent: g_plot_area_line
+                            })
+                        }
                     }
-                }
-            })
-        }
-    })
+                })
+            }
+        })
+
+    }
+
 
     // --- LINES (line datasetItem types only)
     const g_line = element({
@@ -376,36 +420,40 @@ export function chartXy({
     })
     const lineDatasets = formattedDataset.filter(ds => ds.type === 'line');
 
-    lineDatasets.forEach((ds) => {
-        if (ds.values.length) {
-            const normalizedValues = ds.values.map((v, j) => {
-                return {
-                    x: chartArea.left + (slot * j) + (slot / 2),
-                    y: v === null ? null : normalize(v)
-                }
-            })
-            path({
-                options: {
-                    d: 'M' + normalizedValues.map(v => {
-                        if (v.y === null) {
-                            return 'M '
-                        } else {
-                            return `${v.x},${v.y} `
-                        }
-                    }).join(' '),
-                    fill: "none",
-                    stroke: ds.color,
-                    "stroke-width": ds["stroke-width"],
-                    "stroke-dasharray": ds["stroke-dasharray"]!,
-                    "stroke-dashoffset": ds["stroke-dashoffset"]!,
-                    "stroke-linecap": ds["stroke-linecap"],
-                    "stroke-linejoin": ds["stroke-linejoin"],
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: g_line
-            })
-        }
-    })
+    function drawLines() {
+        g_line.innerHTML = "";
+        lineDatasets.forEach((ds) => {
+            if (ds.values.length) {
+                const normalizedValues = ds.values.filter((_, i) => i >= zoom.start && i <= zoom.end).map((v, j) => {
+                    return {
+                        x: chartArea.left + (slot * j) + (slot / 2),
+                        y: v === null ? null : normalize(v)
+                    }
+                })
+                path({
+                    options: {
+                        d: ('M' + normalizedValues.map(v => {
+                            if (v.y === null) {
+                                return 'M '
+                            } else {
+                                return `${v.x},${v.y} `
+                            }
+                        }).join(' ')).replace('MM', 'M').trimEnd().replace(/M$/, ''),
+                        fill: "none",
+                        stroke: ds.color,
+                        "stroke-width": ds["stroke-width"],
+                        "stroke-dasharray": ds["stroke-dasharray"]!,
+                        "stroke-dashoffset": ds["stroke-dashoffset"]!,
+                        "stroke-linecap": ds["stroke-linecap"],
+                        "stroke-linejoin": ds["stroke-linejoin"],
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: g_line
+                })
+            }
+        })
+    }
+
 
     // --- AREAS (area datasetItem types only)
     const g_area = element({
@@ -418,19 +466,86 @@ export function chartXy({
 
     const areaDatasets = formattedDataset.filter(ds => ds.type === 'area');
 
-    areaDatasets.forEach((ds) => {
-        if (ds.values.length) {
-            const normalizedValues = ds.values.map((v, j) => {
-                return {
-                    x: chartArea.left + (slot * j) + (slot / 2),
-                    y: v === null ? null : normalize(v)
-                }
-            })
+    function drawAreas() {
+        g_area.innerHTML = ""
+        areaDatasets.forEach((ds) => {
+            if (ds.values.length) {
+                const normalizedValues = ds.values.filter((_, i) => i >= zoom.start && i <= zoom.end).map((v, j) => {
+                    return {
+                        x: chartArea.left + (slot * j) + (slot / 2),
+                        y: v === null ? null : normalize(v)
+                    }
+                })
 
+                const hasGradient = ds.gradientFrom && ds.gradientTo && ds.gradientDirection;
+                const areaGradientId = ds.uid
+                if (hasGradient) {
+                    const stops: GradientStop[] = [
+                        {
+                            offset: "0%",
+                            'stop-color': ds.gradientFrom!,
+                            'stop-opacity': 1
+                        },
+                        {
+                            offset: "100%",
+                            'stop-color': ds.gradientTo!,
+                            'stop-opacity': 1
+                        },
+                    ]
+
+                    linearGradient({
+                        stops,
+                        id: areaGradientId,
+                        parent: g_area,
+                        direction: ds.gradientDirection
+                    })
+                }
+
+                path({
+                    options: {
+                        d: `M ${normalizedValues[0].x},${chartArea.bottom} ${normalizedValues.map(v => {
+                            if (v.y === null) {
+                                return ' '
+                            } else {
+                                return `${v.x},${v.y} `
+                            }
+                        }).join(' ')} ${normalizedValues[normalizedValues.length - 1].x},${chartArea.bottom}Z`,
+                        fill: hasGradient ? `url(#${areaGradientId})` : ds.fill,
+                        stroke: ds.color,
+                        "stroke-width": ds["stroke-width"],
+                        "stroke-dasharray": ds["stroke-dasharray"]!,
+                        "stroke-dashoffset": ds["stroke-dashoffset"]!,
+                        "stroke-linecap": ds["stroke-linecap"],
+                        "stroke-linejoin": ds["stroke-linejoin"],
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: g_area
+                })
+            }
+        })
+    }
+
+
+    // --- BARS (bar datasetItem types only)
+    const g_bar = element({
+        el: SvgItem.G,
+        options: {
+            className: 'savyg-bar'
+        },
+        parent: chart
+    })
+
+
+    function drawBars() {
+        const barDatasets = formattedDataset.filter(ds => ds.type === 'bar');
+        const barSlot = (width - userOptions.paddingLeft! - userOptions.paddingRight!) / barDatasets.length / maxSeriesLength
+        g_bar.innerHTML = ""
+        barDatasets.forEach((ds, i) => {
             const hasGradient = ds.gradientFrom && ds.gradientTo && ds.gradientDirection;
-            const areaGradientId = ds.uid
+            const barGradientPositiveId = ds.uid
+            const barGradientNegativeId = createUid()
             if (hasGradient) {
-                const stops: GradientStop[] = [
+                const stopsPositive: GradientStop[] = [
                     {
                         offset: "0%",
                         'stop-color': ds.gradientFrom!,
@@ -442,124 +557,63 @@ export function chartXy({
                         'stop-opacity': 1
                     },
                 ]
+                const stopsNegative: GradientStop[] = [
+                    {
+                        offset: "0%",
+                        'stop-color': ds.gradientTo!,
+                        'stop-opacity': 1
+                    },
+                    {
+                        offset: "100%",
+                        'stop-color': ds.gradientFrom!,
+                        'stop-opacity': 1
+                    },
+                ]
 
                 linearGradient({
-                    stops,
-                    id: areaGradientId,
-                    parent: g_area,
+                    stops: stopsPositive,
+                    id: barGradientPositiveId,
+                    parent: g_bar,
+                    direction: ds.gradientDirection
+                })
+                linearGradient({
+                    stops: stopsNegative,
+                    id: barGradientNegativeId,
+                    parent: g_bar,
                     direction: ds.gradientDirection
                 })
             }
 
-            path({
-                options: {
-                    d: `M ${normalizedValues[0].x},${chartArea.bottom} ${normalizedValues.map(v => {
-                        if (v.y === null) {
-                            return ' '
-                        } else {
-                            return `${v.x},${v.y} `
-                        }
-                    }).join(' ')} ${normalizedValues[normalizedValues.length - 1].x},${chartArea.bottom}Z`,
-                    fill: hasGradient ? `url(#${areaGradientId})` : ds.fill,
-                    stroke: ds.color,
-                    "stroke-width": ds["stroke-width"],
-                    "stroke-dasharray": ds["stroke-dasharray"]!,
-                    "stroke-dashoffset": ds["stroke-dashoffset"]!,
-                    "stroke-linecap": ds["stroke-linecap"],
-                    "stroke-linejoin": ds["stroke-linejoin"],
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: g_area
-            })
-        }
-    })
-
-    // --- BARS (bar datasetItem types only)
-    const g_bar = element({
-        el: SvgItem.G,
-        options: {
-            className: 'savyg-bar'
-        },
-        parent: chart
-    })
-
-    const barDatasets = formattedDataset.filter(ds => ds.type === 'bar');
-    const barSlot = (width - userOptions.paddingLeft! - userOptions.paddingRight!) / barDatasets.length / maxSeriesLength
-
-    barDatasets.forEach((ds, i) => {
-
-        const hasGradient = ds.gradientFrom && ds.gradientTo && ds.gradientDirection;
-        const barGradientPositiveId = ds.uid
-        const barGradientNegativeId = createUid()
-        if (hasGradient) {
-            const stopsPositive: GradientStop[] = [
-                {
-                    offset: "0%",
-                    'stop-color': ds.gradientFrom!,
-                    'stop-opacity': 1
-                },
-                {
-                    offset: "100%",
-                    'stop-color': ds.gradientTo!,
-                    'stop-opacity': 1
-                },
-            ]
-            const stopsNegative: GradientStop[] = [
-                {
-                    offset: "0%",
-                    'stop-color': ds.gradientTo!,
-                    'stop-opacity': 1
-                },
-                {
-                    offset: "100%",
-                    'stop-color': ds.gradientFrom!,
-                    'stop-opacity': 1
-                },
-            ]
-
-            linearGradient({
-                stops: stopsPositive,
-                id: barGradientPositiveId,
-                parent: g_bar,
-                direction: ds.gradientDirection
-            })
-            linearGradient({
-                stops: stopsNegative,
-                id: barGradientNegativeId,
-                parent: g_bar,
-                direction: ds.gradientDirection
-            })
-        }
-
-        ds.values.forEach((v, j) => {
-            rect({
-                options: {
-                    x: (chartArea.left + barSlot * i) + (barSlot * j * barDatasets.length) + userOptions.barSpacing!,
-                    y: (v ?? 0) < 0 ? absoluteZero : normalize(v ?? 0),
-                    height: (v ?? 0) >= 0 ? absoluteZero - normalize(v ?? 0) : normalize(v ?? 0) - absoluteZero,
-                    width: barSlot - userOptions.barSpacing! * 2,
-                    fill: hasGradient ? (v ?? 0) > 0 ? `url(#${barGradientPositiveId})` : `url(#${barGradientNegativeId})` : ds.color,
-                    rx: ds.rx ?? undefined,
-                    ry: ds.ry ?? undefined,
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: g_bar
-            })
-            if (v !== null) {
-                text({
+            ds.values.filter((_, i) => i >= zoom.start && i <= zoom.end).forEach((v, j) => {
+                rect({
                     options: {
-                        x: (chartArea.left + barSlot * i) + (barSlot * j * barDatasets.length) + userOptions.barSpacing! + ((barSlot) / 2 - (userOptions.barSpacing!)),
-                        y: normalize(v ?? 0) + ((v ?? 0) < 0 ? ds.dataLabelsFontSize + ds.dataLabelOffsetY : (-ds.dataLabelsFontSize / 2 - ds.dataLabelOffsetY)),
-                        "text-anchor": "middle",
-                        "font-size": ds.dataLabelsFontSize,
-                        content: fordinum(v ?? 0, ds.rounding),
-                        fill: ds.dataLabelsColor
+                        x: (chartArea.left + barSlot * i) + (barSlot * j * barDatasets.length) + userOptions.barSpacing!,
+                        y: (v ?? 0) < 0 ? absoluteZero : normalize(v ?? 0),
+                        height: (v ?? 0) >= 0 ? absoluteZero - normalize(v ?? 0) : normalize(v ?? 0) - absoluteZero,
+                        width: barSlot - userOptions.barSpacing! * 2,
+                        fill: hasGradient ? (v ?? 0) > 0 ? `url(#${barGradientPositiveId})` : `url(#${barGradientNegativeId})` : ds.color,
+                        rx: ds.rx ?? undefined,
+                        ry: ds.ry ?? undefined,
+                        "shape-rendering": userOptions["shape-rendering"]
                     },
                     parent: g_bar
                 })
-            }
+                if (v !== null) {
+                    text({
+                        options: {
+                            x: (chartArea.left + barSlot * i) + (barSlot * j * barDatasets.length) + userOptions.barSpacing! + ((barSlot) / 2 - (userOptions.barSpacing!)),
+                            y: normalize(v ?? 0) + ((v ?? 0) < 0 ? ds.dataLabelsFontSize + ds.dataLabelOffsetY : (-ds.dataLabelsFontSize / 2 - ds.dataLabelOffsetY)),
+                            "text-anchor": "middle",
+                            "font-size": ds.dataLabelsFontSize,
+                            content: fordinum(v ?? 0, ds.rounding),
+                            fill: ds.dataLabelsColor
+                        },
+                        parent: g_bar
+                    })
+                }
+            })
         })
-    })
+    }
 
     // LEGEND
 
@@ -651,26 +705,41 @@ export function chartXy({
         trap?.setAttribute('fill', 'transparent');
     }
 
-    function setTooltipCoordinates(event: any) {
-        tooltipCoordinates.x = event.clientX
-        tooltipCoordinates.y = event.clientY
-        const tt = document.getElementById(tooltipId) as HTMLElement;
+    function setTooltipCoordinates(event: any, index: number) {
+        if (!isZooming) {
+            tooltipCoordinates.x = event.clientX
+            tooltipCoordinates.y = event.clientY
+            const tt = document.getElementById(tooltipId) as HTMLElement;
 
-        tt!.setAttribute("style", `min-width:0;padding:12px;display:flex;position:fixed;top:${tooltipCoordinates.y + 24}px;left:${tooltipCoordinates.x}px;flex-direction:column;gap:3px;align-items:start;background:${userOptions.tooltipBackgroundColor};color:${userOptions.tooltipColor};font-family:inherit;box-shadow:0 6px 12px -6px rgba(0,0,0,0.3);width:200px;`)
+            tt!.setAttribute("style", `min-width:0;padding:12px;display:flex;position:fixed;top:${tooltipCoordinates.y + 24}px;left:${tooltipCoordinates.x}px;flex-direction:column;gap:3px;align-items:start;background:${userOptions.tooltipBackgroundColor};color:${userOptions.tooltipColor};font-family:inherit;box-shadow:0 6px 12px -6px rgba(0,0,0,0.3);width:200px;`)
 
-        const tooltipRect = tt.getBoundingClientRect();
-        const chartRect = chart.getBoundingClientRect();
+            const tooltipRect = tt.getBoundingClientRect();
+            const chartRect = chart.getBoundingClientRect();
 
-        if (event.clientX + tooltipRect.width / 2 > chartRect.right) {
-            tt.style.left = String(tooltipCoordinates.x - tooltipRect.width) + 'px'
-        } else if (event.clientX - tooltipRect.width / 2 < chartRect.left) {
-            tt.style.left = String(chartRect.left) + "px"
-        } else {
-            tt.style.left = String(tooltipCoordinates.x - tooltipRect.width / 2) + 'px'
+            if (event.clientX + tooltipRect.width / 2 > chartRect.right) {
+                tt.style.left = String(tooltipCoordinates.x - tooltipRect.width) + 'px'
+            } else if (event.clientX - tooltipRect.width / 2 < chartRect.left) {
+                tt.style.left = String(chartRect.left) + "px"
+            } else {
+                tt.style.left = String(tooltipCoordinates.x - tooltipRect.width / 2) + 'px'
+            }
+
+            if (event.clientY + tooltipRect.height > chartRect.bottom) {
+                tt.style.top = String(tooltipCoordinates.y - tooltipRect.height - 48) + 'px'
+            }
         }
 
-        if (event.clientY + tooltipRect.height > chartRect.bottom) {
-            tt.style.top = String(tooltipCoordinates.y - tooltipRect.height - 48) + 'px'
+        // set all selected traps to color
+        const traps = document.querySelectorAll(`[data-savyg-zoom="${globalUid}"]`);
+        if (isZooming) {
+            if (!selectedTraps.includes(index)) {
+                selectedTraps.push(index)
+            }
+            Array.from(traps).forEach((trap, i) => {
+                if (i === index || selectedTraps.includes(i)) {
+                    trap.setAttribute("fill", userOptions.zoomColor!)
+                }
+            })
         }
     }
 
@@ -683,33 +752,78 @@ export function chartXy({
         parent.appendChild(tt)
     }
 
-    if (userOptions.interactive) {
-        const tooltip_traps = element({
-            el: SvgItem.G,
-            options: {
-                className: 'savyg-tooltip-trap'
-            },
-            parent: chart
-        })
+    const tooltip_traps = element({
+        el: SvgItem.G,
+        options: {
+            className: 'savyg-tooltip-trap'
+        },
+        parent: chart
+    })
 
-        for (let i = 0; i < maxSeriesLength; i += 1) {
-            const trap = rect({
-                options: {
-                    x: chartArea.left + (slot * i),
-                    y: chartArea.top,
-                    height: height - userOptions.paddingTop! - userOptions.paddingBottom!,
-                    width: slot,
-                    fill: "transparent",
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: tooltip_traps
-            })
-            trap.setAttribute("id", `${globalUid}_${i}`)
-            trap.addEventListener('mouseenter', () => tooltip(i))
-            trap.addEventListener('mouseleave', () => killTooltip(i))
-            trap.addEventListener('mousemove', (e) => setTooltipCoordinates(e))
+    function drawTraps() {
+        if (userOptions.interactive) {
+            tooltip_traps.innerHTML = ""
+            for (let i = 0; i < maxSeriesLength; i += 1) {
+                const trap = rect({
+                    options: {
+                        x: chartArea.left + (slot * i),
+                        y: chartArea.top,
+                        height: height - userOptions.paddingTop! - userOptions.paddingBottom!,
+                        width: slot,
+                        fill: "transparent",
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: tooltip_traps
+                })
+                trap.setAttribute("id", `${globalUid}_${i}`)
+                trap.dataset.savygZoom = globalUid;
+                trap.style.cursor = "crosshair"
+                trap.addEventListener('mouseenter', () => !isZooming && tooltip(i))
+                trap.addEventListener('mouseleave', () => killTooltip(i))
+                trap.addEventListener('mousemove', (e) => setTooltipCoordinates(e, i))
+                trap.addEventListener('mousedown', () => setZoomStart(i))
+                trap.addEventListener('mouseup', () => setZoomEnd(i))
+            }
         }
     }
+
+    function setZoomStart(index: number) {
+        killTooltip(index)
+        isZooming = true;
+        zoom.start = index;
+    }
+
+    function setZoomEnd(index: number) {
+        killTooltip(index)
+        zoom.end = index
+        isZooming = false;
+        selectedTraps = [];
+        if (zoom.end < zoom.start) {
+            let temp = zoom.start
+            zoom.start = index;
+            zoom.end = temp
+        }
+        if (zoom.end === zoom.start) {
+            zoom.start = 0;
+            zoom.end = getMaxSerieLength(dataset).maxSeriesLength
+        }
+        mutateMaxSeriesLength()
+        calculateMinMax()
+        calculateBounds()
+        calculateAbsolutes()
+        drawDatapoints()
+    }
+
+    function drawDatapoints() {
+        drawGrid()
+        drawPlotsAndLines()
+        drawLines()
+        drawAreas()
+        drawBars()
+        drawTraps()
+    }
+
+    drawDatapoints()
 
     if (parent) {
         parent.appendChild(chart);

@@ -1,7 +1,7 @@
 {
   "name": "savyg",
   "private": false,
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "A savvy library to create svg elements and charts with ease",
   "author": "Alec Lloyd Probert",
   "repository": {

@@ -13,17 +13,28 @@ export function getSvgDimensions(viewBox: string) {
     }
 }
 
-export function getMinMaxInDatasetItems(datasetItems: BaseDatasetItem[]) {
-    const flattened = datasetItems.flatMap(d => d.values.filter(v => v !== null)) as number[];
+export function getMinMaxInDatasetItems(datasetItems: BaseDatasetItem[], zoom?: { start: number, end: number }) {
+    let flattened;
+    if (zoom) {
+        flattened = datasetItems.flatMap(d => d.values.filter((_, i) => i >= zoom.start && i <= zoom.end).filter(v => v !== null)) as number[];
+    } else {
+        flattened = datasetItems.flatMap(d => d.values.filter(v => v !== null)) as number[];
+    }
     return {
         max: Math.max(...flattened),
         min: Math.min(...flattened)
     }
 }
 
-export function getMaxSerieLength(datasetItems: BaseDatasetItem[]) {
-    return {
-        maxSeriesLength: Math.max(...datasetItems.map(d => d.values.length))
+export function getMaxSerieLength(datasetItems: BaseDatasetItem[], zoom?: { start: number, end: number }) {
+    if (zoom) {
+        return {
+            maxSeriesLength: Math.max(...datasetItems.map(d => d.values.filter((_v, i) => i >= zoom.start && i <= zoom.end).length))
+        }
+    } else {
+        return {
+            maxSeriesLength: Math.max(...datasetItems.map(d => d.values.length))
+        }
     }
 }
 
