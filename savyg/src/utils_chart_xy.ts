@@ -59,6 +59,7 @@ export type ChartXyOptions = {
     xAxisLabelsOffsetY?: number
     yAxisLabelsColor?: string
     yAxisLabelsFontSize?: number
+    yAxisLabelRounding?: number
     zoomColor?: string
 }
 
@@ -129,6 +130,7 @@ export function chartXy({
         xAxisLabelsFontSize: options?.xAxisLabelsFontSize ?? 12,
         xAxisLabelsOffsetY: options?.xAxisLabelsOffsetY ?? 0,
         yAxisLabelsColor: options?.yAxisLabelsColor ?? '#000000',
+        yAxisLabelRounding: options?.yAxisLabelRounding ?? 1,
         yAxisLabelsFontSize: options?.yAxisLabelsFontSize ?? 12,
         zoomColor: options?.zoomColor ?? '#00FF0010'
     }
@@ -176,7 +178,7 @@ export function chartXy({
     let min: number, max: number;
 
     function calculateMinMax() {
-        min = getMinMaxInDatasetItems(dataset, zoom).min
+        min = getMinMaxInDatasetItems(dataset, zoom).min < 0 ? getMinMaxInDatasetItems(dataset, zoom).min : 0
         max = getMinMaxInDatasetItems(dataset, zoom).max
     }
 
@@ -326,7 +328,7 @@ export function chartXy({
                         y: normalizedValue + userOptions.yAxisLabelsFontSize! / 3,
                         "text-anchor": "end",
                         "font-size": userOptions.yAxisLabelsFontSize,
-                        content: String(tick),
+                        content: fordinum(tick, userOptions.yAxisLabelRounding),
                         fill: userOptions.yAxisLabelsColor
                     },
                     parent: grid
