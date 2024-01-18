@@ -71,7 +71,8 @@ export function chartXy({
     options?: ChartXyOptions
     parent?: HTMLElement
 }) {
-    const formattedDataset = dataset.map((ds, i) => {
+
+    const absoluteDataset = dataset.map((ds, i) => {
         return {
             ...ds,
             "stroke-dasharray": ds['stroke-dasharray'] ?? null,
@@ -96,6 +97,8 @@ export function chartXy({
             uid: createUid(),
         }
     })
+
+    const formattedDataset = [...absoluteDataset];
 
     const userOptions: ChartXyOptions = {
         axisColor: options?.axisColor ?? '#000000',
@@ -175,7 +178,6 @@ export function chartXy({
     function calculateMinMax() {
         min = getMinMaxInDatasetItems(dataset, zoom).min
         max = getMinMaxInDatasetItems(dataset, zoom).max
-        console.log({ min, max })
     }
 
     calculateMinMax()
@@ -205,7 +207,6 @@ export function chartXy({
         absoluteMax = Math.abs(bounds.max + absoluteMin)
         absoluteZero = chartArea.bottom - ((height - userOptions.paddingBottom! - userOptions.paddingTop!) * ratioToMax(absoluteMin, absoluteMax))
         slot = (width - chartArea.left - userOptions.paddingRight!) / maxSeriesLength;
-        console.log({ slot })
     }
 
     calculateAbsolutes();
@@ -687,13 +688,14 @@ export function chartXy({
     function tooltip(index: number) {
         const tt = document.getElementById(tooltipId) as HTMLElement
         const trap = document.getElementById(`${globalUid}_${index}`) as HTMLElement;
+        const datapointIndex = index + zoom.start;
         trap.setAttribute('fill', userOptions.selectorColor!)
         let html = '';
         if (options?.xAxisLabels && options?.xAxisLabels!.length) {
-            html += `<div>${options.xAxisLabels![index]}</div>`;
+            html += `<div>${options.xAxisLabels![datapointIndex]}</div>`;
         }
-        formattedDataset.forEach(ds => {
-            html += `<div style="min-width:0; display:flex; flex-direction:row;gap:4px;align-items:center;"><div><svg viewBox="0 0 20 20" height="14" width="14" style="margin-right:3px;margin-bottom:-1px"><circle cx="10" cy="10" r="9" fill="${ds.gradientFrom && ds.gradientTo && ds.gradientDirection ? `url(#${ds.uid})` : ds.color}"/></svg><span>${ds.name}</span> : <b>${[undefined, null].includes(ds.values[index] as any) ? '-' : fordinum(ds.values[index] ?? 0, ds.rounding)}</b></div></div>`
+        absoluteDataset.forEach(ds => {
+            html += `<div style="min-width:0; display:flex; flex-direction:row;gap:4px;align-items:center;"><div><svg viewBox="0 0 20 20" height="14" width="14" style="margin-right:3px;margin-bottom:-1px"><circle cx="10" cy="10" r="9" fill="${ds.gradientFrom && ds.gradientTo && ds.gradientDirection ? `url(#${ds.uid})` : ds.color}"/></svg><span>${ds.name}</span> : <b>${[undefined, null].includes(ds.values[datapointIndex] as any) ? '-' : fordinum(ds.values[datapointIndex] ?? 0, ds.rounding)}</b></div></div>`
         })
         tt!.innerHTML = html;
     }
