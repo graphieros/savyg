@@ -1,4 +1,4 @@
-import { chartXy, radialGradient, svg, circle, chartDonut, chartGauge } from "savyg";
+import { chartXy, radialGradient, svg, circle, chartDonut, chartGauge, clipPath, path, use, findArcMidpoint } from "savyg";
 
 // const parent = document.getElementById("svg") as HTMLElement
 const div = document.getElementById("div") as HTMLElement
@@ -35,7 +35,7 @@ chartGauge({
   },
   parent: div
 })
-chartGauge({
+let gauge = chartGauge({
   dataset: {
     value: 4.56,
     segments: [
@@ -59,11 +59,11 @@ chartGauge({
   parent: div
 })
 
-chartXy({
+let xy = chartXy({
   dataset: [
     {
       name: 'serie 1',
-      values: [-120.18, 0, 25, 0, 12, 25, 50, 102, 165, 220, 143, 212],
+      values: [1, 2, 3, 5, 12, 100],
       type: "bar",
       rounding: 1,
       plotRadius: 0,
@@ -71,12 +71,12 @@ chartXy({
       gradientTo: "#0000FF33",
       rx: 3
     },
-    {
-      name: 'serie 2 with a long name',
-      values: [-10, 20, 125, null, 12, 5, 36, 56],
-      type: "line",
-      fill: "#FF000033"
-    },
+    // {
+    //   name: 'serie 2 with a long name',
+    //   values: [-10, 20, 125, null, 12, 5, 36, 56],
+    //   type: "line",
+    //   fill: "#FF000033"
+    // },
   ],
   parent: div,
   options: {
@@ -88,11 +88,11 @@ chartXy({
   }
 })
 
-chartDonut({
+let donut = chartDonut({
   dataset: [
     {
       name: "serie 1",
-      value: 20,
+      value: 0.2,
     },
     {
       name: "serie 2",
@@ -110,5 +110,16 @@ chartDonut({
   parent: div,
   options: {
     title: "Title",
+    showDataLabels: true
   }
+})
+
+console.log(findArcMidpoint(donut.arcs[0].pathElement))
+
+const nuke = document.getElementById('nuke');
+
+nuke?.addEventListener('click', () => {
+  gauge = gauge.refresh(div)
+  xy = xy.refresh(div)
+  donut = donut.refresh(div)
 })

@@ -107,7 +107,7 @@ export function chartDonut({
         options: {
             viewBox: userOptions.viewBox,
             className: options?.className ?? '',
-            id: options?.id ?? ''
+            id: options?.id ?? globalUid
         }
     })
 
@@ -138,7 +138,7 @@ export function chartDonut({
         centerY: height / 2,
     }
 
-    const arcs = makeDonut({
+    let arcs = makeDonut({
         series: formattedDataset,
         cx: width / 2,
         cy: height / 2,
@@ -213,8 +213,6 @@ export function chartDonut({
             })
         })
     }
-
-    // ARCS
 
     const tooltipId = createUid();
 
@@ -310,23 +308,33 @@ export function chartDonut({
         },
         parent: chart
     })
+
+    arcs = arcs.map((a: any, i: number) => {
+        return {
+            ...a,
+            path: path({
+                options: {
+                    d: a.path,
+                    stroke: a.color,
+                    "stroke-width": userOptions.donutThickness,
+                    fill: "none",
+                    id: `${globalUid}_${i}`,
+                    "shape-rendering": userOptions["shape-rendering"]
+                }
+            })
+        }
+    })
+
     arcs.forEach((arc: { path: string; color: string }, i: number) => {
-        const anArc = path({
-            options: {
-                d: arc.path,
-                stroke: arc.color,
-                "stroke-width": userOptions.donutThickness,
-                fill: "none",
-                id: `${globalUid}_${i}`,
-                "shape-rendering": userOptions["shape-rendering"]
-            },
-            parent: donutArcs
-        })
+        const anArc = arc.path as unknown as SVGPathElement
+
         if (userOptions.interactive) {
             anArc.addEventListener("mouseenter", () => tooltip(i))
             anArc.addEventListener("mouseleave", () => killTooltip(i))
             anArc.addEventListener('mousemove', (e) => setTooltipCoordinates(e))
         }
+
+        donutArcs.appendChild(anArc)
     })
 
     // HOLLOW
@@ -437,7 +445,44 @@ export function chartDonut({
         parent.appendChild(chart)
     }
 
-    return chart;
+    function refresh(rootNode: HTMLElement) {
+        if (chart && rootNode) {
+            const tt = document.getElementById(tooltipId);
+            if (tt) {
+                tt.remove()
+            }
+            if (parent) {
+                parent.removeChild(chart)
+            } else {
+                rootNode.removeChild(chart)
+            }
+            const donut = chartDonut({
+                dataset,
+                options,
+                parent: rootNode
+            });
+            return donut
+        }
+    }
+
+    return {
+        chart,
+        refresh,
+        arcs: arcs.map((a: any, i: number) => {
+            return {
+                pathElement: a.path,
+                name: formattedDataset[i].name,
+                color: formattedDataset[i].color,
+                uid: formattedDataset[i].uid,
+                value: formattedDataset[i].value,
+                percentage: formattedDataset[i].proportion
+            }
+        }),
+        dimensions: {
+            centerX: drawingArea.centerX,
+            centerY: drawingArea.centerY
+        }
+    }
 }
 
 const utils_chart_donut = {

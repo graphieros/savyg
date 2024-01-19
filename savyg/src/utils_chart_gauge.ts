@@ -97,7 +97,7 @@ export function chartGauge({
         options: {
             viewBox: userOptions.viewBox,
             className: options?.className ?? '',
-            id: options?.id ?? ''
+            id: options?.id ?? `gauge_${globalUid}`
         }
     })
 
@@ -171,7 +171,7 @@ export function chartGauge({
         parent: chart
     })
 
-    const arcs = makeDonut({
+    let arcs = makeDonut({
         series: formattedDataset.segments,
         cx: drawingArea.centerX,
         cy: drawingArea.centerY + height / 4,
@@ -184,18 +184,25 @@ export function chartGauge({
         rotation: Math.PI
     })
 
-    arcs.forEach((arc: { path: string; color: string; }, i: number) => {
-        path({
-            options: {
-                d: arc.path,
-                stroke: arc.color,
-                "stroke-width": userOptions.arcThickness,
-                fill: "none",
-                className: `savyg-gauge-arc-path savyg-gauge-arc-path-${i}`,
-                "shape-rendering": userOptions["shape-rendering"]
-            },
-            parent: segments
-        })
+    arcs = arcs.map((a: any, i: number) => {
+        return {
+            ...a,
+            path: path({
+                options: {
+                    d: a.path,
+                    stroke: a.color,
+                    "stroke-width": userOptions.arcThickness,
+                    fill: "none",
+                    className: `savyg-gauge-arc-path savyg-gauge-arc-path-${i}`,
+                    "shape-rendering": userOptions["shape-rendering"]
+                },
+            })
+        }
+    })
+
+    arcs.forEach((arc: { path: string; color: string; }) => {
+        const anArc = arc.path as unknown as SVGPathElement;
+        segments.appendChild(anArc)
     })
 
     const pointer = element({
@@ -304,7 +311,33 @@ export function chartGauge({
         parent.appendChild(chart)
     }
 
-    return chart
+    function refresh(rootNode: HTMLElement) {
+        if (chart && rootNode) {
+            if (parent) {
+                parent.removeChild(chart)
+            } else {
+                rootNode.removeChild(chart)
+            }
+            const gauge = chartGauge({
+                dataset,
+                options,
+                parent: rootNode
+            })
+            return gauge
+        }
+    }
+
+    return {
+        chart,
+        refresh,
+        arcs: arcs.map((a: any) => {
+            return {
+                pathElement: a.path,
+                color: a.color,
+            }
+        })
+
+    }
 }
 
 const utils_chart_gauge = {

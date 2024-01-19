@@ -25,9 +25,22 @@
         transition: all 0.3s ease-in-out;
         filter:drop-shadow(0 6px 12px rgba(0,0,0,0.3))
       }
+      @keyframes openYourHeart {
+        from {
+          r: 0;
+        }
+        to {
+          r: 60px;
+        }
+      }
+
+      #myClip circle {
+        animation: openYourHeart 15s infinite;
+      }
     </style>
     <div id="div" style="font-family: Arial, Helvetica, sans-serif">
     </div>
+    <button id="nuke">NUKE</button>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

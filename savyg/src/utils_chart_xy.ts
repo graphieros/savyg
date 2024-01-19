@@ -141,7 +141,7 @@ export function chartXy({
         options: {
             viewBox: userOptions.viewBox,
             className: options?.className ?? '',
-            id: options?.id ?? ''
+            id: options?.id ?? `xy_${globalUid}`
         }
     })
 
@@ -833,9 +833,31 @@ export function chartXy({
         parent.appendChild(chart);
     }
 
-    /**************************************************************************/
+    function refresh(rootNode: HTMLElement) {
+        if (chart && rootNode) {
+            const tt = document.getElementById(tooltipId);
+            if (tt) {
+                tt.remove();
+            }
+            if (parent) {
+                parent.removeChild(chart)
+            } else {
+                rootNode.removeChild(chart)
+            }
+            const xy = chartXy({
+                dataset,
+                options,
+                parent: rootNode
+            })
 
-    return chart;
+            return xy
+        }
+    }
+
+    return {
+        chart,
+        refresh
+    }
 }
 
 const utils_chart_line = {

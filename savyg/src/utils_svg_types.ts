@@ -11,7 +11,9 @@ export enum SvgItem {
     STOP = "stop",
     SVG = "svg",
     FOREIGN_OBJECT = "foreignObject",
-    TEXT = "text"
+    TEXT = "text",
+    CLIP_PATH = "clipPath",
+    USE = "use",
 }
 
 export type ShapeRendering = "auto" | "optimizeSpeed" | "crispEdges" | "geometricPrecision"
@@ -19,12 +21,25 @@ export type ShapeRendering = "auto" | "optimizeSpeed" | "crispEdges" | "geometri
 export type CommonOptions = {
     className?: string
     content?: string
+    "clip-path"?: string
 }
 
 export type Coordinates = {
     x: number
     y: number
     z?: number
+}
+
+export type ClipPath = CommonOptions & {
+    id: string
+    className?: string
+    clipPathUnits?: "userSpaceOnUse" | "objectBoundingBox"
+}
+
+export type Use = CommonOptions & {
+    "clip-path"?: string
+    "xlink:href"?: string
+    fill?: string
 }
 
 export type DrawingArea = {
@@ -40,7 +55,7 @@ export type DrawingArea = {
     centerY: number;
 }
 
-export type Shape = "circle" | "defs" | "g" | "line" | "linearGradient" | "radialGradient" | "path" | "polygon" | "rect" | "stop" | "svg" | "foreignObject" | "text"
+export type Shape = "circle" | "defs" | "g" | "line" | "linearGradient" | "radialGradient" | "path" | "polygon" | "rect" | "stop" | "svg" | "foreignObject" | "text" | "clipPath" | "use"
 
 export type StrokeLinecap = "round" | "butt" | "square"
 export type StrokeLinejoin = "arcs" | "bevel" | "miter" | "miter-clip" | "round"
@@ -67,6 +82,8 @@ export type SvgOptions = {
     [SvgItem.SVG]: SvgWrapper
     [SvgItem.FOREIGN_OBJECT]: ForeignObject
     [SvgItem.TEXT]: Text
+    [SvgItem.USE]: Use
+    [SvgItem.CLIP_PATH]: ClipPath
 
 };
 

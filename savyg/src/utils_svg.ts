@@ -21,7 +21,7 @@ export function element<T extends SvgItem>(attrs: {
                     item.classList.add(cn)
                 })
             } else {
-                if (!['className', 'content'].includes(key) && ![undefined, null].includes(value as any)) {
+                if (!['className', 'content', 'xlink:href'].includes(key) && ![undefined, null].includes(value as any)) {
                     item.setAttribute(optionKey, String(value));
                 }
             }
@@ -30,6 +30,10 @@ export function element<T extends SvgItem>(attrs: {
 
     if (attrs.options.content) {
         item.innerHTML = attrs.options.content;
+    }
+
+    if ((attrs.options as any)["xlink:href"]) {
+        item.setAttributeNS(CONSTANT.XMLNS, "xlink:href", (attrs.options as any)["xlink:href"])
     }
 
     if (attrs.parent) {
@@ -113,6 +117,39 @@ export function path(attrs: {
 }) {
     return element({
         el: SvgItem.PATH,
+        options: attrs.options,
+        parent: attrs.parent
+    })
+}
+
+/**
+ * 
+ * @description Creates an empty clipPath svg element.
+ * @returns a clipPath svg element
+ */
+export function clipPath(attrs: {
+    options: SvgOptions[SvgItem.CLIP_PATH],
+    parent?: SVGElement | HTMLElement
+}) {
+    return element({
+        el: SvgItem.CLIP_PATH,
+        options: attrs.options,
+        parent: attrs.parent
+    })
+}
+
+/**
+ * 
+ * @description Creates a use svg element.
+ * @returns a use svg element
+ */
+
+export function use(attrs: {
+    options: SvgOptions[SvgItem.USE],
+    parent?: SVGElement | HTMLElement
+}) {
+    return element({
+        el: SvgItem.USE,
         options: attrs.options,
         parent: attrs.parent
     })
@@ -209,7 +246,7 @@ export function linearGradient(attrs: {
     id: string,
     direction: "vertical" | "horizontal",
     gradientUnits?: "userSpaceOnUse" | "objectBoundingBox",
-    spreadMethod?: "pad" | "reflect" | "repeat", // defaults to pad
+    spreadMethod?: "pad" | "reflect" | "repeat",
 }) {
     const def = document.createElementNS(CONSTANT.XMLNS, SvgItem.DEFS)
     const linearGradient = document.createElementNS(CONSTANT.XMLNS, SvgItem.LINEAR_GRADIENT)
@@ -305,18 +342,81 @@ export function radialGradient(attrs: {
     return def
 }
 
+export function findArcMidpoint(pathElement: SVGPathElement) {
+    const length = pathElement.getTotalLength();
+    let start = 0;
+    let end = length;
+    let midpointParameter = length / 2;
+
+    const epsilon = 0.01; // Avoiding infinite loop caused by floating point
+    while (end - start > epsilon) {
+        const mid = (start + end) / 2;
+        const midPoint = pathElement.getPointAtLength(mid);
+        const midLength = midPoint.x;
+
+        if (Math.abs(midLength - midpointParameter) < epsilon) {
+            midpointParameter = mid;
+            break;
+        } else if (midLength < midpointParameter) {
+            start = mid;
+        } else {
+            end = mid;
+        }
+    }
+    const { x, y } = pathElement.getPointAtLength(midpointParameter);
+    return { x, y };
+}
+
+export function offsetFromCenterPoint({
+    initX,
+    initY,
+    offset,
+    centerX,
+    centerY
+}: {
+    initX: number;
+    initY: number;
+    offset: number;
+    centerX: number;
+    centerY: number
+}) {
+    const angle = Math.atan2(initY - centerY, initX - centerX);
+    return {
+        x: initX + offset * Math.cos(angle),
+        y: initY + offset * Math.sin(angle)
+    }
+}
+
+export function setTextAnchorFromCenterPoint({ x, centerX, middleRange = 0 }: { x: number; centerX: number; middleRange?: number }) {
+    switch (true) {
+        case x > centerX - middleRange && x < centerX + middleRange:
+            return "middle";
+        case x > centerX + middleRange:
+            return "start";
+        case x < centerX - middleRange:
+            return "end";
+        default:
+            return "end"
+    }
+}
+
 const utils_svg = {
     circle,
-    linearGradient,
+    clipPath,
     element,
+    findArcMidpoint,
     freePolygon,
     line,
+    linearGradient,
+    offsetFromCenterPoint,
     path,
     radialGradient,
     rect,
     regularPolygon,
+    setTextAnchorFromCenterPoint,
     svg,
-    text
+    text,
+    use,
 }
 
 export default utils_svg
