@@ -335,8 +335,11 @@ export function chartGauge({
                 pathElement: a.path,
                 color: a.color,
             }
-        })
-
+        }),
+        dimensions: {
+            centerX: drawingArea.centerX,
+            centerY: drawingArea.centerY + height / 4,
+        }
     }
 }
 
