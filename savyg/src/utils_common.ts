@@ -105,10 +105,13 @@ export function ratioToMax(value: number, max: number) {
 }
 
 export function createUid() {
+    const cryptoArray = new Uint8Array(16);
+    window.crypto.getRandomValues(cryptoArray);
+
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-        .replace(/[xy]/g, function (c) {
-            const r = Math.random() * 16 | 0,
-                v = c == 'x' ? r : (r & 0x3 | 0x8);
+        .replace(/[xy]/g, function (c, index) {
+            const r = cryptoArray[index >> 1];
+            const v = c === 'x' ? r & 0x0F : (r & 0x3 | 0x8);
             return v.toString(16);
         });
 }
