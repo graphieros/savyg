@@ -1,6 +1,6 @@
 import { palette } from "./palette"
-import { createDonutMarker, createUid, fordinum, getSvgDimensions, makeDonut, positionDonutLabel } from "./utils_common"
-import { circle, element, line, path, svg, text } from "./utils_svg"
+import { createUid, fordinum, getSvgDimensions, makeDonut } from "./utils_common"
+import { circle, element, findArcMidpoint, line, offsetFromCenterPoint, path, setTextAnchorFromCenterPoint, svg, text } from "./utils_svg"
 import { ChartArea, DrawingArea, ShapeRendering, StrokeOptions, SvgItem, TextAnchor } from "./utils_svg_types"
 
 export type ChartDonutDatasetItem = StrokeOptions & {
@@ -16,6 +16,10 @@ export type ChartDonutOptions = {
     dataLabelsFontSize?: number
     dataLabelsRoundingPercentage?: number
     dataLabelsRoundingValue?: number
+    dataLabelsOffset?: number
+    dataLabelsLineOffset?: number
+    hideLabelUnderPercentage?: number
+    donutRadiusRatio?: number
     donutThickness?: number
     fontFamily?: string
     id?: string
@@ -75,8 +79,12 @@ export function chartDonut({
         dataLabelsFontSize: options?.dataLabelsFontSize ?? 12,
         dataLabelsRoundingPercentage: options?.dataLabelsRoundingPercentage ?? 0,
         dataLabelsRoundingValue: options?.dataLabelsRoundingValue ?? 0,
-        donutThickness: options?.donutThickness ?? 56,
+        dataLabelsOffset: options?.dataLabelsOffset ?? 70,
+        dataLabelsLineOffset: options?.dataLabelsLineOffset ?? 45,
+        donutThickness: options?.donutThickness ?? 48,
+        donutRadiusRatio: options?.donutRadiusRatio ?? 1,
         fontFamily: options?.fontFamily ?? 'inherit',
+        hideLabelUnderPercentage: options?.hideLabelUnderPercentage ?? 3,
         interactive: options?.interactive ?? true,
         legendColor: options?.legendColor ?? '#000000',
         legendFontSize: options?.legendFontSize ?? 10,
@@ -142,77 +150,9 @@ export function chartDonut({
         series: formattedDataset,
         cx: width / 2,
         cy: height / 2,
-        rx: width / 5,
-        ry: width / 5
+        rx: width / (5.5 / userOptions.donutRadiusRatio!),
+        ry: width / (5.5 / userOptions.donutRadiusRatio!)
     })
-
-
-    if (userOptions.showDataLabels) {
-        const markers = element({
-            el: SvgItem.G,
-            options: {
-                className: 'savyg-marker'
-            },
-            parent: chart
-        })
-
-        arcs.forEach((arc: { path: string, color: string, name: string, proportion: number, value: number, center: { endX: number, endY: number } }, i: number) => {
-            const labelPosition = positionDonutLabel({ drawingArea, element: arc })
-            text({
-                options: {
-                    x: labelPosition.x,
-                    y: labelPosition.y,
-                    fill: userOptions.dataLabelsColor!,
-                    "font-size": userOptions.dataLabelsFontSize!,
-                    "text-anchor": labelPosition.textAnchor as TextAnchor,
-                    content: arc.name,
-                    id: `${globalUid}_marker_name_${i}`,
-                },
-                parent: markers
-            })
-
-            const percentagePosition = positionDonutLabel({ drawingArea, element: arc, offset: 3 + userOptions.dataLabelsFontSize! })
-            text({
-                options: {
-                    x: percentagePosition.x,
-                    y: percentagePosition.y,
-                    fill: userOptions.dataLabelsColor!,
-                    "font-size": userOptions.dataLabelsFontSize!,
-                    "text-anchor": percentagePosition.textAnchor as TextAnchor,
-                    content: `${fordinum(arc.proportion * 100, userOptions.dataLabelsRoundingPercentage, '%')} (${fordinum(arc.value, userOptions.dataLabelsRoundingValue)})`,
-                    id: `${globalUid}_marker_value_${i}`,
-                },
-                parent: markers
-            })
-
-            line({
-                options: {
-                    x1: arc.center.endX,
-                    y1: arc.center.endY,
-                    x2: createDonutMarker({ drawingArea, element: arc, offset: drawingArea.width / 5 }).x2,
-                    y2: createDonutMarker({ drawingArea, element: arc, offset: drawingArea.width / 5 }).y2,
-                    stroke: arc.color,
-                    "stroke-width": 1,
-                    id: `${globalUid}_marker_line_${i}`,
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: markers
-            })
-
-            circle({
-                options: {
-                    cx: arc.center.endX,
-                    cy: arc.center.endY,
-                    fill: arc.color,
-                    r: 3,
-                    stroke: "none",
-                    id: `${globalUid}_marker_circle_${i}`,
-                    "shape-rendering": userOptions["shape-rendering"]
-                },
-                parent: markers
-            })
-        })
-    }
 
     const tooltipId = createUid();
 
@@ -324,6 +264,162 @@ export function chartDonut({
             })
         }
     })
+
+    if (userOptions.showDataLabels) {
+        const markers = element({
+            el: SvgItem.G,
+            options: {
+                className: 'savyg-marker'
+            },
+            parent: chart
+        })
+
+        let count = formattedDataset.map(d => d.proportion * 100).filter(v => v < userOptions.hideLabelUnderPercentage!).length;
+
+        arcs.forEach((arc: { path: string, color: string, name: string, proportion: number, value: number, center: { endX: number, endY: number } }, i: number) => {
+            const arcMidPoint = findArcMidpoint(arc.path as unknown as SVGPathElement)
+
+            const lineEndpoint = offsetFromCenterPoint({
+                initX: arcMidPoint.x,
+                initY: arcMidPoint.y,
+                offset: userOptions.dataLabelsLineOffset!,
+                centerX: drawingArea.centerX,
+                centerY: drawingArea.centerY
+            })
+
+            const lineEndpointUnderValue = offsetFromCenterPoint({
+                initX: arcMidPoint.x,
+                initY: arcMidPoint.y,
+                offset: userOptions.dataLabelsLineOffset!,
+                centerX: drawingArea.centerX,
+                centerY: drawingArea.centerY
+            })
+
+            const lineStart = offsetFromCenterPoint({
+                initX: arcMidPoint.x,
+                initY: arcMidPoint.y,
+                offset: userOptions.donutThickness! / 2,
+                centerX: drawingArea.centerX,
+                centerY: drawingArea.centerY
+            })
+
+            if (formattedDataset[i].proportion * 100 >= userOptions.hideLabelUnderPercentage!) {
+                const labelSerieEndpoint = offsetFromCenterPoint({
+                    initX: arcMidPoint.x,
+                    initY: arcMidPoint.y,
+                    offset: userOptions.dataLabelsOffset!,
+                    centerX: drawingArea.centerX,
+                    centerY: drawingArea.centerY
+                })
+
+                text({
+                    options: {
+                        x: labelSerieEndpoint.x,
+                        y: labelSerieEndpoint.y,
+                        fill: userOptions.dataLabelsColor!,
+                        "font-size": userOptions.dataLabelsFontSize!,
+                        "text-anchor": setTextAnchorFromCenterPoint({
+                            x: labelSerieEndpoint.x,
+                            centerX: drawingArea.centerX,
+                            middleRange: 30
+                        }),
+                        content: arc.name,
+                        id: `${globalUid}_marker_name_${i}`,
+                    },
+                    parent: markers
+                })
+
+                text({
+                    options: {
+                        x: labelSerieEndpoint.x,
+                        y: labelSerieEndpoint.y + userOptions.dataLabelsFontSize!,
+                        fill: userOptions.dataLabelsColor!,
+                        "font-size": userOptions.dataLabelsFontSize!,
+                        "text-anchor": setTextAnchorFromCenterPoint({
+                            x: labelSerieEndpoint.x,
+                            centerX: drawingArea.centerX,
+                            middleRange: 30
+                        }),
+                        content: `${fordinum(arc.proportion * 100, userOptions.dataLabelsRoundingPercentage, '%')} (${fordinum(arc.value, userOptions.dataLabelsRoundingValue)})`,
+                        id: `${globalUid}_marker_value_${i}`,
+                    },
+                    parent: markers
+                })
+
+                line({
+                    options: {
+                        x1: lineStart.x,
+                        y1: lineStart.y,
+                        x2: lineEndpoint.x,
+                        y2: lineEndpoint.y,
+                        stroke: arc.color,
+                        "stroke-width": 1,
+                        id: `${globalUid}_marker_line_${i}`,
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: markers
+                })
+
+                circle({
+                    options: {
+                        cx: lineEndpoint.x,
+                        cy: lineEndpoint.y,
+                        fill: arc.color,
+                        r: 3,
+                        stroke: "none",
+                        id: `${globalUid}_marker_circle_${i}`,
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: markers
+                })
+
+            } else {
+                const topDistance = (drawingArea.centerX - lineEndpointUnderValue.x) / 2
+                const lineEndY = (lineEndpointUnderValue.y * 1.3) - (count * (userOptions.dataLabelsFontSize!)) - topDistance
+
+                path({
+                    options: {
+                        d: `M${lineStart.x},${lineStart.y} ${lineEndpointUnderValue.x},${lineEndY}`,
+                        stroke: arc.color,
+                        "stroke-width": 0.6,
+                        id: `${globalUid}_marker_line_${i}`,
+                        "stroke-linecap": "round",
+                        "shape-rendering": userOptions["shape-rendering"],
+                        fill: "none"
+                    },
+                    parent: markers
+                })
+
+                circle({
+                    options: {
+                        cx: lineEndpointUnderValue.x,
+                        cy: lineEndY,
+                        fill: arc.color,
+                        r: 1.8,
+                        stroke: "none",
+                        id: `${globalUid}_marker_circle_${i}`,
+                        "shape-rendering": userOptions["shape-rendering"]
+                    },
+                    parent: markers
+                })
+
+                text({
+                    options: {
+                        x: lineEndpointUnderValue.x + 6,
+                        y: lineEndY + (userOptions.dataLabelsFontSize! * 0.6) / 4,
+                        fill: userOptions.dataLabelsColor!,
+                        "font-size": userOptions.dataLabelsFontSize! * 0.6,
+                        "text-anchor": "start",
+                        content: `${arc.name} : ${fordinum(arc.proportion * 100, userOptions.dataLabelsRoundingPercentage, '%')} (${fordinum(arc.value, userOptions.dataLabelsRoundingValue)})`,
+                        id: `${globalUid}_marker_name_${i}`,
+                    },
+                    parent: markers
+                })
+
+                count -= 1
+            }
+        })
+    }
 
     arcs.forEach((arc: { path: string; color: string }, i: number) => {
         const anArc = arc.path as unknown as SVGPathElement
