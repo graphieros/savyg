@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, expect, test } from "vitest"
-import { circle, freePolygon, line, path, rect, svg, text, linearGradient, radialGradient } from "../src/utils_svg"
+import { circle, freePolygon, line, path, rect, svg, text, linearGradient, radialGradient, offsetFromCenterPoint, setTextAnchorFromCenterPoint } from "../src/utils_svg"
 
 describe('circle', () => {
     test("returns a circle svg element", () => {
@@ -256,5 +256,42 @@ describe('radialGradient', () => {
             id: "rg"
         })
         expect(rg.toString()).toEqual(`<defs><radialgradient id="rg"><stop offset="0%" stop-color="#FF0000"></stop><stop offset="100%" stop-color="#0000FF"></stop></radialgradient></defs>`)
+    })
+})
+
+describe('offsetFromCenterPoint', () => {
+    test('returns offset cooridnates from a center point', () => {
+        expect(offsetFromCenterPoint({
+            initX: 10,
+            initY: 10,
+            offset: 10,
+            centerX: 10,
+            centerY: 20,
+        })).toStrictEqual({
+            x: 10,
+            y: 0
+        })
+    })
+})
+
+describe('setTextAnchorFromCenterPoint', () => {
+    test('returns a text anchor definition based on offset from centerX', () => {
+        expect(setTextAnchorFromCenterPoint({
+            x: 10,
+            centerX: 20,
+            middleRange: 0
+        })).toBe("end")
+
+        expect(setTextAnchorFromCenterPoint({
+            x: 30,
+            centerX: 20,
+            middleRange: 0
+        })).toBe("start")
+
+        expect(setTextAnchorFromCenterPoint({
+            x: 21,
+            centerX: 20,
+            middleRange: 5
+        })).toBe("middle")
     })
 })

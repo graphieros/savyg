@@ -14,6 +14,8 @@ export enum SvgItem {
     TEXT = "text",
     CLIP_PATH = "clipPath",
     USE = "use",
+    MARKER = "marker",
+    ARROW = "arrow"
 }
 
 export type ShapeRendering = "auto" | "optimizeSpeed" | "crispEdges" | "geometricPrecision"
@@ -55,7 +57,7 @@ export type DrawingArea = {
     centerY: number;
 }
 
-export type Shape = "circle" | "defs" | "g" | "line" | "linearGradient" | "radialGradient" | "path" | "polygon" | "rect" | "stop" | "svg" | "foreignObject" | "text" | "clipPath" | "use"
+export type Shape = "circle" | "defs" | "g" | "line" | "linearGradient" | "radialGradient" | "path" | "polygon" | "rect" | "stop" | "svg" | "foreignObject" | "text" | "clipPath" | "use" | "marker"
 
 export type StrokeLinecap = "round" | "butt" | "square"
 export type StrokeLinejoin = "arcs" | "bevel" | "miter" | "miter-clip" | "round"
@@ -84,6 +86,8 @@ export type SvgOptions = {
     [SvgItem.TEXT]: Text
     [SvgItem.USE]: Use
     [SvgItem.CLIP_PATH]: ClipPath
+    [SvgItem.MARKER]: Marker
+    [SvgItem.ARROW]: Arrow
 
 };
 
@@ -112,6 +116,8 @@ export type Path = StrokeOptions & CommonOptions & {
     id?: string
     fill?: string
     "shape-rendering"?: ShapeRendering
+    "marker-start"?: string
+    "marker-end"?: string
 }
 
 export type GradientStop = {
@@ -190,6 +196,8 @@ export type Line = StrokeOptions & CommonOptions & {
     y1: number
     y2: number
     "shape-rendering"?: ShapeRendering
+    "marker-start"?: string
+    "marker-end"?: string
 }
 
 export type ChartArea = {
@@ -199,4 +207,35 @@ export type ChartArea = {
     bottom: number
     centerX?: number
     centerY?: number
+}
+
+export type PreserveAspectRatioValue =
+    | 'none'
+    | 'xMinYMin'
+    | 'xMidYMin'
+    | 'xMaxYMin'
+    | 'xMinYMid'
+    | 'xMidYMid'
+    | 'xMaxYMid'
+    | 'xMinYMax'
+    | 'xMidYMax'
+    | 'xMaxYMax'
+
+type PreserveAspectRatio = `${PreserveAspectRatioValue} ${'meet' | 'slice' | ''}`;
+
+export type Marker = CommonOptions & {
+    id?: string
+    markerHeight?: number
+    markerWidth?: number
+    markerUnits?: 'userSpaceOnUse' | 'strokeWidth'
+    orient?: 'auto' | 'auto-start-reverse'
+    preserveAspectRatio?: PreserveAspectRatio
+    refX?: number | 'left' | 'center' | 'right'
+    refY?: number | 'top' | 'center' | 'bottom'
+    viewBox?: string
+}
+
+export type Arrow = Line & Marker & {
+    marker: "start" | "end" | "both",
+    size?: number
 }

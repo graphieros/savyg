@@ -1,4 +1,4 @@
-import { chartXy, radialGradient, svg, circle, chartDonut, chartGauge, clipPath, path, use, findArcMidpoint } from "savyg";
+import { chartXy, arrow, chartDonut, chartGauge, clipPath, path, use, findArcMidpoint } from "savyg";
 
 // const parent = document.getElementById("svg") as HTMLElement
 const div = document.getElementById("div") as HTMLElement
@@ -35,6 +35,7 @@ chartGauge({
   },
   parent: div
 })
+
 let gauge = chartGauge({
   dataset: {
     value: 4.56,
@@ -58,6 +59,23 @@ let gauge = chartGauge({
   },
   parent: div
 })
+
+arrow({
+  options: {
+    x1: 10,
+    y1: 10,
+    x2: 60,
+    y2: 100,
+    marker: "both",
+    stroke: "black",
+    "stroke-linecap": "round",
+    "stroke-width": 1,
+    size: 12
+  },
+  parent: gauge.chart
+})
+
+
 
 let xy = chartXy({
   dataset: [

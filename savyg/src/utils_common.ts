@@ -1,6 +1,4 @@
 import { BaseDatasetItem } from "./utils_chart_xy";
-import { DrawingArea } from "./utils_svg_types";
-
 
 export function getSvgDimensions(viewBox: string) {
     const dimensions = viewBox.split(' ');
@@ -249,60 +247,6 @@ export function makeDonut({
     return ratios;
 }
 
-export function createDonutMarker({ drawingArea, element, offset }: { drawingArea: DrawingArea, element: any, offset: number }) {
-    const dx = drawingArea.centerX - element.center.endX;
-    const dy = drawingArea.centerY - element.center.endY;
-
-    const length = Math.sqrt(dx * dx + dy * dy);
-    const endX = element.center.endX + (dx / length) * (length - offset);
-    const endY = element.center.endY + (dy / length) * (length - offset);
-
-    return {
-        x1: element.center.endX,
-        y1: element.center.endY,
-        x2: endX,
-        y2: endY
-    }
-}
-
-export function positionDonutLabel({ drawingArea, element, offset = 0 }: { drawingArea: DrawingArea, element: any, offset?: number }) {
-    let position = {
-        x: element.center.endX,
-        y: element.center.endY + offset,
-        textAnchor: "middle"
-    };
-
-    if (element.center.endX - 12 > drawingArea.centerX) {
-        position.textAnchor = "start";
-        position.x += 12;
-    }
-
-    if (element.center.endX + 12 < drawingArea.centerX) {
-        position.textAnchor = "end";
-        position.x -= 12;
-    }
-
-    if (element.center.endX === drawingArea.centerX) {
-        position.textAnchor = "middle";
-        if (element.center.endY > drawingArea.centerY) {
-            position.y += 12;
-        }
-        if (element.center.endY < drawingArea.centerY) {
-            position.y -= 12;
-        }
-    }
-
-    if (element.center.endY - 6 < (drawingArea.top + drawingArea.height / 4)) {
-        position.y = createDonutMarker({ drawingArea, element, offset: drawingArea.width / 3 }).y2 + offset;
-    }
-
-    if (element.center.endY + 6 > drawingArea.height - (drawingArea.height / 4)) {
-        position.y = createDonutMarker({ drawingArea, element, offset: drawingArea.width / 3 }).y2 + offset;
-    }
-
-    return position;
-}
-
 export function fordinum(n: number, r: number = 0, s: string = '', p: string = ''): string {
     if (isNaN(n)) return n as unknown as string
     return p + (Number(n).toFixed(r)).toLocaleString() + s
@@ -310,7 +254,6 @@ export function fordinum(n: number, r: number = 0, s: string = '', p: string = '
 
 const utils_commons = {
     calculateNiceScale,
-    createDonutMarker,
     createUid,
     fordinum,
     getClosestDecimal,
@@ -318,7 +261,6 @@ const utils_commons = {
     getMinMaxInDatasetItems,
     getSvgDimensions,
     makeDonut,
-    positionDonutLabel,
     ratioToMax,
 }
 

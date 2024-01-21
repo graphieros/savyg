@@ -1,5 +1,6 @@
 import { Coordinates, GradientStop, Shape, SvgItem, SvgOptions } from "./utils_svg_types"
 import { CONSTANT } from "./constants"
+import { createUid } from "./utils_common";
 
 /**
  * 
@@ -169,6 +170,117 @@ export function text(attrs: {
         options: attrs.options,
         parent: attrs.parent
     })
+}
+
+/**
+ * 
+ * @description Creates a svg marker element.
+ * @returns a marker svg element
+ */
+export function marker(attrs: {
+    options: SvgOptions[SvgItem.MARKER],
+    parent?: SVGElement | HTMLElement,
+}) {
+    return element({
+        el: SvgItem.MARKER,
+        options: attrs.options,
+        parent: attrs.parent
+    })
+}
+
+export function arrow(attrs: {
+    options: SvgOptions[SvgItem.ARROW],
+    parent?: SVGElement | HTMLElement
+}) {
+    const uid = createUid();
+
+    const g = element({
+        el: SvgItem.G,
+        options: {
+            className: "savyg-arrow"
+        },
+    })
+
+    const defs = element({
+        el: SvgItem.DEFS,
+        options: {},
+        parent: g
+    })
+    const baseSize = attrs.options.size ?? 10;
+    const viewBox = `0 0 ${baseSize} ${baseSize}`
+    const refX = baseSize / 2
+    const refY = baseSize / 2
+    const markerWidth = refX * 1.2
+    const markerHeight = refY * 1.2
+
+    if (['end', 'both'].includes(attrs.options.marker)) {
+        const markerEnd = marker({
+            options: {
+                id: `marker-end-${uid}`,
+                orient: "auto",
+                viewBox,
+                refX,
+                refY,
+                markerHeight: attrs.options.markerHeight ?? markerHeight,
+                markerWidth: attrs.options.markerWidth ?? markerWidth
+            },
+            parent: defs
+        })
+
+        path({
+            options: {
+                d: `M 0 0 L ${baseSize} ${refX} L 0 ${baseSize} z`,
+                fill: attrs.options.stroke
+            },
+            parent: markerEnd
+        })
+    }
+    if (['start', 'both'].includes(attrs.options.marker)) {
+        const markerStart = marker({
+            options: {
+                id: `marker-start-${uid}`,
+                orient: "auto-start-reverse",
+                viewBox,
+                refX,
+                refY,
+                markerHeight: attrs.options.markerHeight ?? markerHeight,
+                markerWidth: attrs.options.markerWidth ?? markerWidth
+            },
+            parent: defs
+        })
+        path({
+            options: {
+                d: `M 0 0 L ${baseSize} ${refX} L 0 ${baseSize} z`,
+                fill: attrs.options.stroke
+            },
+            parent: markerStart
+        })
+    }
+
+    line({
+        options: {
+            x1: attrs.options.x1,
+            y1: attrs.options.y1,
+            x2: attrs.options.x2,
+            y2: attrs.options.y2,
+            stroke: attrs.options.stroke,
+            "stroke-width": attrs.options["stroke-width"],
+            "stroke-dasharray": attrs.options["stroke-dasharray"],
+            "stroke-dashoffset": attrs.options["stroke-dashoffset"],
+            "stroke-linecap": attrs.options["stroke-linecap"],
+            "stroke-linejoin": attrs.options["stroke-linejoin"],
+            "shape-rendering": attrs.options["shape-rendering"],
+            "marker-end": ['end', 'both'].includes(attrs.options.marker) ? `url(#marker-end-${uid})` : '',
+            "marker-start": ['start', 'both'].includes(attrs.options.marker) ? `url(#marker-start-${uid})` : '',
+        },
+        parent: g
+    })
+
+    if (attrs.parent) {
+        attrs.parent.appendChild(g)
+    }
+
+    return g
 }
 
 export function calcPolygonPoints({
@@ -408,6 +520,7 @@ const utils_svg = {
     freePolygon,
     line,
     linearGradient,
+    marker,
     offsetFromCenterPoint,
     path,
     radialGradient,
