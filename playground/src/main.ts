@@ -92,7 +92,27 @@ let donut = chartDonut({
   dataset: [
     {
       name: "serie 1",
-      value: 0.2,
+      value: 0.1,
+    },
+    {
+      name: "serie 1.1",
+      value: 0 / 1,
+    },
+    {
+      name: "serie 1.3",
+      value: 0.1,
+    },
+    {
+      name: "serie 1.3",
+      value: 0.1,
+    },
+    {
+      name: "serie 1.3",
+      value: 0.1,
+    },
+    {
+      name: "serie 1.3",
+      value: 0.1,
     },
     {
       name: "serie 2",
@@ -106,11 +126,18 @@ let donut = chartDonut({
       name: "serie 4",
       value: 20,
     },
+    {
+      name: "serie 4",
+      value: 20,
+    },
   ],
   parent: div,
   options: {
     title: "Title",
-    showDataLabels: true
+    showDataLabels: true,
+    donutRadiusRatio: 1,
+    dataLabelsRoundingValue: 1,
+    dataLabelsRoundingPercentage: 2
   }
 })
 
