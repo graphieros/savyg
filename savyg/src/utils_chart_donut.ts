@@ -52,11 +52,18 @@ export type ChartDonutOptions = {
 export function chartDonut({
     dataset,
     options,
-    parent
+    parent,
+    callbacks
 }: {
     dataset: ChartDonutDatasetItem[]
     options?: ChartDonutOptions
     parent?: HTMLElement
+    callbacks?: {
+        onClickArc?: (args?: any) => void
+        onClickLegend?: (args?: any) => void
+        onHoverArc?: (args?: any) => void
+        onHoverLegend?: (args?: any) => void
+    }
 }) {
 
     const globalUid = createUid();
@@ -421,6 +428,24 @@ export function chartDonut({
         })
     }
 
+    function clickArc(index: number) {
+        if (callbacks?.onClickArc) {
+            return callbacks?.onClickArc({
+                arc: arcs[index],
+                item: formattedDataset[index]
+            })
+        }
+    }
+
+    function hoverArc(index: number) {
+        if (callbacks?.onHoverArc) {
+            return callbacks?.onHoverArc({
+                arc: arcs[index],
+                item: formattedDataset[index]
+            })
+        }
+    }
+
     arcs.forEach((arc: { path: string; color: string }, i: number) => {
         const anArc = arc.path as unknown as SVGPathElement
 
@@ -428,6 +453,12 @@ export function chartDonut({
             anArc.addEventListener("mouseenter", () => tooltip(i))
             anArc.addEventListener("mouseleave", () => killTooltip(i))
             anArc.addEventListener('mousemove', (e) => setTooltipCoordinates(e))
+            if (callbacks?.onClickArc) {
+                anArc.addEventListener('click', () => clickArc(i))
+            }
+            if (callbacks?.onHoverArc) {
+                anArc.addEventListener('mouseenter', () => hoverArc(i))
+            }
         }
 
         donutArcs.appendChild(anArc)
@@ -490,13 +521,31 @@ export function chartDonut({
             }
         });
 
+        function clickLegend(index: number) {
+            if (callbacks?.onClickLegend) {
+                return callbacks?.onClickLegend({
+                    arc: arcs[index],
+                    item: formattedDataset[index]
+                })
+            }
+        }
+
+        function hoverLegend(index: number) {
+            if (callbacks?.onHoverLegend) {
+                return callbacks?.onHoverLegend({
+                    arc: arcs[index],
+                    item: formattedDataset[index]
+                })
+            }
+        }
+
         legend.style.background = 'transparent';
 
         const legendWrapper = document.createElement('div');
         legendWrapper.classList.add('savyg-legend');
         legendWrapper.setAttribute('style', `display:flex;align-items:center;justify-content:center;flex-direction:row;column-gap:12px;width:100%;height:100%;font-family:inherit;font-size:${userOptions.legendFontSize}px;overflow:visible;flex-wrap:wrap`);
 
-        formattedDataset.forEach(ds => {
+        formattedDataset.forEach((ds, i) => {
             const legendItem = document.createElement('div');
             legendItem.setAttribute("style", `display:flex;flex-direction:row;gap:4px;font-size:inherit;width:fit-content;max-width:100%;align-items:center;justify-content:center;align-items:center;`);
 
@@ -530,6 +579,13 @@ export function chartDonut({
                 legendItem.appendChild(el);
             })
             legendWrapper.appendChild(legendItem)
+
+            if (callbacks?.onClickLegend) {
+                legendItem.addEventListener("click", () => clickLegend(i))
+            }
+            if (callbacks?.onHoverLegend) {
+                legendItem.addEventListener("mouseenter", () => hoverLegend(i))
+            }
         })
 
         legend.appendChild(legendWrapper);
@@ -555,7 +611,8 @@ export function chartDonut({
             const donut = chartDonut({
                 dataset,
                 options,
-                parent: rootNode
+                parent: rootNode,
+                callbacks
             });
             return donut
         }

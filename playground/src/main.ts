@@ -75,7 +75,9 @@ arrow({
   parent: gauge.chart
 })
 
-
+function xyCb(item: any) {
+  console.log(item)
+}
 
 let xy = chartXy({
   dataset: [
@@ -103,8 +105,22 @@ let xy = chartXy({
     xAxisLabels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
     title: "Title",
     zoomColor: "#0000FF10"
+  },
+  callbacks: {
+    onClickLegend: xyCb,
+    // onHoverLegend: xyCb,
+    onClickPeriod: xyCb,
+    // onHoverPeriod: xyCb,
   }
 })
+
+function getArc(arc: any) {
+  console.log(arc)
+}
+
+function getLegend(legend: any) {
+  console.log(legend)
+}
 
 let donut = chartDonut({
   dataset: [
@@ -156,6 +172,12 @@ let donut = chartDonut({
     donutRadiusRatio: 1,
     dataLabelsRoundingValue: 1,
     dataLabelsRoundingPercentage: 2
+  },
+  callbacks: {
+    onClickArc: getArc,
+    onClickLegend: getLegend,
+    onHoverArc: getArc,
+    onHoverLegend: getLegend
   }
 })
 

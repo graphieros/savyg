@@ -66,11 +66,18 @@ export type ChartXyOptions = {
 export function chartXy({
     dataset,
     options,
-    parent
+    parent,
+    callbacks,
 }: {
     dataset: ChartXyDatasetItem[]
     options?: ChartXyOptions
     parent?: HTMLElement
+    callbacks?: {
+        onClickLegend?: (args?: any) => void
+        onHoverLegend?: (args?: any) => void
+        onClickPeriod?: (args?: any) => void
+        onHoverPeriod?: (args?: any) => void
+    }
 }) {
 
     const absoluteDataset = dataset.map((ds, i) => {
@@ -631,13 +638,29 @@ export function chartXy({
             }
         });
 
+        function clickLegend(index: number) {
+            if (callbacks?.onClickLegend) {
+                return callbacks?.onClickLegend({
+                    item: absoluteDataset[index]
+                })
+            }
+        }
+
+        function hoverLegend(index: number) {
+            if (callbacks?.onHoverLegend) {
+                return callbacks?.onHoverLegend({
+                    item: absoluteDataset[index]
+                })
+            }
+        }
+
         legend.style.background = 'transparent';
 
         const legendWrapper = document.createElement('div');
         legendWrapper.classList.add('savyg-legend');
         legendWrapper.setAttribute('style', `display:flex;align-items:center;justify-content:center;flex-direction:row;column-gap:12px;width:100%;height:100%;font-family:inherit;font-size:${userOptions.legendFontSize}px;overflow:visible`);
 
-        formattedDataset.forEach(ds => {
+        formattedDataset.forEach((ds, i) => {
             const legendItem = document.createElement('div');
             legendItem.setAttribute("style", `display:flex;flex-direction:row;gap:4px;font-size:inherit;width:100%;align-items:center;justify-content:center;align-items:center`);
 
@@ -671,6 +694,13 @@ export function chartXy({
                 legendItem.appendChild(el);
             })
             legendWrapper.appendChild(legendItem)
+
+            if (callbacks?.onClickLegend) {
+                legendItem.addEventListener("click", () => clickLegend(i))
+            }
+            if (callbacks?.onHoverLegend) {
+                legendItem.addEventListener("mouseenter", () => hoverLegend(i))
+            }
         })
 
         legend.appendChild(legendWrapper);
@@ -764,6 +794,19 @@ export function chartXy({
         parent: chart
     })
 
+    function hoverPeriod(index: number) {
+        if (callbacks?.onHoverPeriod) {
+            return callbacks?.onHoverPeriod({
+                item: absoluteDataset.map(el => {
+                    return {
+                        ...el,
+                        value: el.values[index] ?? null
+                    }
+                })
+            })
+        }
+    }
+
     function drawTraps() {
         if (userOptions.interactive) {
             tooltip_traps.innerHTML = ""
@@ -782,6 +825,7 @@ export function chartXy({
                 trap.setAttribute("id", `${globalUid}_${i}`)
                 trap.dataset.savygZoom = globalUid;
                 trap.style.cursor = "crosshair"
+                trap.addEventListener("mouseenter", () => hoverPeriod(i))
                 trap.addEventListener('mouseenter', () => !isZooming && tooltip(i))
                 trap.addEventListener('mouseleave', () => killTooltip(i))
                 trap.addEventListener('mousemove', (e) => setTooltipCoordinates(e, i))
@@ -795,6 +839,16 @@ export function chartXy({
         killTooltip(index)
         isZooming = true;
         zoom.start = index;
+        if (callbacks?.onClickPeriod) {
+            return callbacks?.onClickPeriod({
+                item: absoluteDataset.map((el) => {
+                    return {
+                        ...el,
+                        value: el.values[index] ?? null,
+                    }
+                })
+            })
+        }
     }
 
     function setZoomEnd(index: number) {
@@ -847,7 +901,8 @@ export function chartXy({
             const xy = chartXy({
                 dataset,
                 options,
-                parent: rootNode
+                parent: rootNode,
+                callbacks
             })
 
             return xy
