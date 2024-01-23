@@ -105,7 +105,8 @@ export function ratioToMax(value: number, max: number) {
 export function createUid() {
     const cryptoArray = new Uint8Array(16);
     window.crypto.getRandomValues(cryptoArray);
-
+    cryptoArray[6] = (cryptoArray[6] & 0x0F) | 0x40;
+    cryptoArray[8] = (cryptoArray[8] & 0x3F) | 0x80;
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
         .replace(/[xy]/g, function (c, index) {
             const r = cryptoArray[index >> 1];
@@ -113,6 +114,7 @@ export function createUid() {
             return v.toString(16);
         });
 }
+
 
 export function rotateMatrix(x: number) {
     return [

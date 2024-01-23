@@ -431,8 +431,18 @@ export function chartDonut({
     function clickArc(index: number) {
         if (callbacks?.onClickArc) {
             return callbacks?.onClickArc({
-                arc: arcs[index],
-                item: formattedDataset[index]
+                arc: {
+                    "stroke-width": arcs[index]["stroke-width"],
+                    arcMidpoint: findArcMidpoint(arcs[index].path),
+                    color: arcs[index].color,
+                    cx: arcs[index].cx,
+                    cy: arcs[index].cy,
+                    name: arcs[index].name,
+                    path: arcs[index].path,
+                    proportion: arcs[index].proportion,
+                    uid: arcs[index].uid,
+                    value: arcs[index].value,
+                }
             })
         }
     }
@@ -440,8 +450,18 @@ export function chartDonut({
     function hoverArc(index: number) {
         if (callbacks?.onHoverArc) {
             return callbacks?.onHoverArc({
-                arc: arcs[index],
-                item: formattedDataset[index]
+                arc: {
+                    "stroke-width": arcs[index]["stroke-width"],
+                    arcMidpoint: findArcMidpoint(arcs[index].path),
+                    color: arcs[index].color,
+                    cx: arcs[index].cx,
+                    cy: arcs[index].cy,
+                    name: arcs[index].name,
+                    path: arcs[index].path,
+                    proportion: arcs[index].proportion,
+                    uid: arcs[index].uid,
+                    value: arcs[index].value,
+                },
             })
         }
     }
@@ -624,6 +644,7 @@ export function chartDonut({
         arcs: arcs.map((a: any, i: number) => {
             return {
                 pathElement: a.path,
+                arcMidPoint: findArcMidpoint(a.path),
                 name: formattedDataset[i].name,
                 color: formattedDataset[i].color,
                 uid: formattedDataset[i].uid,
