@@ -327,9 +327,25 @@ export function chartGauge({
         }
     }
 
+    function updateData(ds: ChartGaugeDataset) {
+        if (chart && parent) {
+
+            parent.removeChild(chart)
+            const gauge = chartGauge({
+                dataset: ds,
+                options,
+                parent,
+            })
+            return gauge
+        } else {
+            return
+        }
+    }
+
     return {
         chart,
         refresh,
+        updateData,
         arcs: arcs.map((a: any) => {
             return {
                 pathElement: a.path,

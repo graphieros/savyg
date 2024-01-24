@@ -638,9 +638,29 @@ export function chartDonut({
         }
     }
 
+    function updateData(ds: ChartDonutDatasetItem[]) {
+        if (chart && parent) {
+            const tt = document.getElementById(tooltipId);
+            if (tt) {
+                tt.remove()
+            }
+            parent.removeChild(chart)
+            const donut = chartDonut({
+                dataset: ds,
+                options,
+                parent,
+                callbacks
+            });
+            return donut
+        } else {
+            return
+        }
+    }
+
     return {
         chart,
         refresh,
+        updateData,
         arcs: arcs.map((a: any, i: number) => {
             return {
                 pathElement: a.path,

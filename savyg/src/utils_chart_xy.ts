@@ -909,9 +909,29 @@ export function chartXy({
         }
     }
 
+    function updateData(ds: ChartXyDatasetItem[]) {
+        if (chart && parent) {
+            const tt = document.getElementById(tooltipId);
+            if (tt) {
+                tt.remove()
+            }
+            parent.removeChild(chart)
+            const xy = chartXy({
+                dataset: ds,
+                options,
+                parent,
+                callbacks
+            })
+            return xy
+        } else {
+            return
+        }
+    }
+
     return {
         chart,
-        refresh
+        refresh,
+        updateData
     }
 }
 
