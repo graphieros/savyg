@@ -98,7 +98,7 @@ export type SvgWrapper = CommonOptions & {
     id?: string
 }
 
-export type TextAnchor = "start" | "middle" | "end"
+export type TextAnchor = "start" | "middle" | "end" | "left" | "center" | "right"
 
 export type Text = CommonOptions & StrokeOptions & {
     x: number;

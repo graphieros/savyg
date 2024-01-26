@@ -78,7 +78,7 @@ arrow({
 })
 
 function xyCb(item: any) {
-  console.log(item)
+  // console.log(item)
 }
 
 const xyDataset = [
@@ -117,7 +117,7 @@ function getArc(arc: any) {
 }
 
 function getLegend(legend: any) {
-  console.log(legend)
+  // console.log(legend)
 }
 
 let donut = chartDonut({
@@ -169,7 +169,8 @@ let donut = chartDonut({
     showDataLabels: true,
     donutRadiusRatio: 1,
     dataLabelsRoundingValue: 1,
-    dataLabelsRoundingPercentage: 2
+    dataLabelsRoundingPercentage: 2,
+    dataLabelsAsDivs: false
   },
   callbacks: {
     onClickArc: getArc,
@@ -179,7 +180,7 @@ let donut = chartDonut({
   }
 })
 
-console.log(findArcMidpoint(donut.arcs[0].pathElement))
+// console.log(findArcMidpoint(donut.arcs[0].pathElement))
 
 const nuke = document.getElementById('nuke');
 

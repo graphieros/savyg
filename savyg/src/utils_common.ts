@@ -131,7 +131,7 @@ export function matrixTimes([[a, b], [c, d]]: any, [x, y]: [number, number]) {
     return [a * x + b * y, c * x + d * y];
 }
 
-export function createArc([cx, cy]: any, [rx, ry]: any, [position, ratio]: [number, number], phi: number, degrees: number = 360, piMult = 2) {
+export function createArc([cx, cy]: any, [rx, ry]: any, [position, ratio]: [number, number], phi: number, degrees: number = 360, piMult = 2, reverse = false) {
     ratio = ratio % (piMult * Math.PI);
     const rotMatrix = rotateMatrix(phi);
     const [sX, sY] = addVector(
@@ -149,20 +149,20 @@ export function createArc([cx, cy]: any, [rx, ry]: any, [position, ratio]: [numb
         [cx, cy]
     );
     const fA = ratio > Math.PI ? 1 : 0;
-    const fS = ratio > 0 ? 1 : 0;
+    const fS = ratio > 0 ? reverse ? 0 : 1 : reverse ? 1 : 0;
     return {
-        startX: sX,
-        startY: sY,
-        endX: eX,
-        endY: eY,
-        path: `M${sX} ${sY} A ${[
+        startX: reverse ? eX : sX,
+        startY: reverse ? eY : sY,
+        endX: reverse ? sX : eX,
+        endY: reverse ? sY : eY,
+        path: `M${reverse ? eX : sX} ${reverse ? eY : sY} A ${[
             rx,
             ry,
             (phi / (piMult * Math.PI)) * degrees,
             fA,
             fS,
-            eX,
-            eY,
+            reverse ? sX : eX,
+            reverse ? sY : eY,
         ].join(" ")}`,
     };
 }
@@ -177,18 +177,20 @@ export function makeDonut({
     piMult = 2,
     arcAmpl = 1.45,
     degrees = 360,
-    rotation = 105.25
+    rotation = 105.25,
+    size = 0
 }: {
-    series: any,
-    cx: number,
-    cy: number,
-    rx: number,
-    ry: number,
-    piProportion?: number,
-    piMult?: number,
-    arcAmpl?: number
-    degrees?: number
-    rotation?: number
+    series: any;
+    cx: number;
+    cy: number;
+    rx: number;
+    ry: number;
+    piProportion?: number;
+    piMult?: number;
+    arcAmpl?: number;
+    degrees?: number;
+    rotation?: number;
+    size?: number
 }) {
     if (!series) {
         return {
@@ -224,7 +226,18 @@ export function makeDonut({
             piMult
         );
 
+        const inner = createArc(
+            [cx, cy],
+            [rx - size, ry - size],
+            [acc, ratio],
+            rotation,
+            degrees,
+            piMult,
+            true
+        )
+
         ratios.push({
+            arcSlice: `${path} L ${inner.startX} ${inner.startY} ${inner.path} L ${startX} ${startY}`,
             cx,
             cy,
             ...series[i],
@@ -242,7 +255,7 @@ export function makeDonut({
                 rotation,
                 degrees,
                 piMult
-            ), // center of the arc, to display the marker. rx & ry are larger to be displayed with a slight offset
+            ), // center of the arc, to display a marker. rx & ry are larger to be displayed with a slight offset
         });
         acc += ratio;
     }

@@ -499,16 +499,29 @@ export function offsetFromCenterPoint({
     }
 }
 
-export function setTextAnchorFromCenterPoint({ x, centerX, middleRange = 0 }: { x: number; centerX: number; middleRange?: number }) {
-    switch (true) {
-        case x > centerX - middleRange && x < centerX + middleRange:
-            return "middle";
-        case x > centerX + middleRange:
-            return "start";
-        case x < centerX - middleRange:
-            return "end";
-        default:
-            return "end"
+export function setTextAnchorFromCenterPoint({ x, centerX, middleRange = 0, isDiv = false }: { x: number; centerX: number; middleRange?: number, isDiv?: boolean }) {
+    if (isDiv) {
+        switch (true) {
+            case x > centerX - middleRange && x < centerX + middleRange:
+                return "center";
+            case x > centerX + middleRange:
+                return "left";
+            case x < centerX - middleRange:
+                return "right";
+            default:
+                return "right"
+        }
+    } else {
+        switch (true) {
+            case x > centerX - middleRange && x < centerX + middleRange:
+                return "middle";
+            case x > centerX + middleRange:
+                return "start";
+            case x < centerX - middleRange:
+                return "end";
+            default:
+                return "end"
+        }
     }
 }
 
