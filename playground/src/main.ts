@@ -1,18 +1,18 @@
-import { chartXy, arrow, chartDonut, chartGauge, clipPath, path, use, findArcMidpoint, ChartXyDatasetItem } from "savyg";
+import { chartXy, arrow, chartDonut, text, chartGauge, clipPath, path, use, findArcMidpoint, ChartXyDatasetItem } from "savyg";
 
 // const parent = document.getElementById("svg") as HTMLElement
 const div = document.getElementById("div") as HTMLElement
 
 const gaugeDs = {
-  value: 4.56,
+  value: "4.56",
   segments: [
     {
-      from: 0,
-      to: 1
+      from: "0",
+      to: "1"
     },
     {
-      from: 1,
-      to: 2
+      from: "1",
+      to: "2"
     },
     {
       from: 2,
@@ -34,6 +34,8 @@ let gauge1 = chartGauge({
   options: {
     title: "Title",
     valueRounding: 1,
+    pointerSize: 1,
+    pointerWidth: 12
   },
   parent: div
 })
@@ -90,7 +92,8 @@ const xyDataset = [
     plotRadius: 0,
     gradientFrom: "#FF000033",
     gradientTo: "#0000FF33",
-    rx: 3
+    rx: 3,
+    dataLabelsColor: "red"
   }
 ] as ChartXyDatasetItem[]
 
@@ -98,11 +101,32 @@ let xy = chartXy({
   dataset: xyDataset,
   parent: div,
   options: {
+    axisColor: "#000000",
+    backgroundColor: "#FFFFFF",
+    fontFamily: "inherit",
     barSpacing: 2,
-    showAxis: true,
     xAxisLabels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+    zoomColor: "#0000FF10",
+    gridColor: "#CCCCCC",
+    interactive: true,
+    legendColor: "#000000",
+    legendFontSize: 10,
+    paddingBottom: 48,
+    paddingLeft: 48,
+    paddingRight: 24,
+    paddingTop: 48,
+    selectorColor: "#FF000010",
+    "shape-rendering": "auto",
+    showAxis: true,
+    showGrid: true,
+    showLegend: true,
     title: "Title",
-    zoomColor: "#0000FF10"
+    titleColor: "#000000",
+    titleFontSize: 18,
+    titlePosition: "start",
+    tooltipBackgroundColor: "#FFFFFF",
+    tooltipColor: "#000000",
+    viewBox: "0 0 512 341"
   },
   callbacks: {
     onClickLegend: xyCb,
@@ -124,43 +148,11 @@ let donut = chartDonut({
   dataset: [
     {
       name: "serie 1",
-      value: 0.1,
+      value: "12",
     },
     {
       name: "serie 1.1",
-      value: 0 / 1,
-    },
-    {
-      name: "serie 1.3",
-      value: 0.1,
-    },
-    {
-      name: "serie 1.3",
-      value: 0.1,
-    },
-    {
-      name: "serie 1.3",
-      value: 0.1,
-    },
-    {
-      name: "serie 1.3",
-      value: 0.1,
-    },
-    {
-      name: "serie 2",
-      value: 10,
-    },
-    {
-      name: "serie 3",
-      value: 10,
-    },
-    {
-      name: "serie 4",
-      value: 20,
-    },
-    {
-      name: "serie 4",
-      value: 20,
+      value: 12,
     },
   ],
   parent: div,
@@ -180,7 +172,6 @@ let donut = chartDonut({
   }
 })
 
-// console.log(findArcMidpoint(donut.arcs[0].pathElement))
 
 const nuke = document.getElementById('nuke');
 
@@ -220,6 +211,6 @@ const genDs = document.getElementById('genDs')
 
 genDs?.addEventListener('click', () => {
   donut = donut.updateData(makeRandomDonutDataset())
-  gauge1 = gauge1.updateData(makeRandomGaugeDataset())
   xy = xy.updateData(makeRandomXyDataset())
+  gauge1 = gauge1.updateData(makeRandomGaugeDataset())
 })

@@ -162,6 +162,11 @@ export function use(attrs: {
  * @returns a svg path element
  */
 export function text(attrs: {
+    /**
+     * @option x: number
+     * @option y: number
+     * @option content: text element content, cannot be broken into several lines
+     */
     options: SvgOptions[SvgItem.TEXT],
     parent?: SVGElement | HTMLElement,
 }) {
@@ -455,6 +460,7 @@ export function radialGradient(attrs: {
 }
 
 export function findArcMidpoint(pathElement: SVGPathElement) {
+    console.log({ pathElement })
     const length = pathElement.getTotalLength();
     let start = 0;
     let end = length;

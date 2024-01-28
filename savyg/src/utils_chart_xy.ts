@@ -1,65 +1,252 @@
 import { ChartArea, GradientStop, ShapeRendering, StrokeOptions, SvgItem } from "./utils_svg_types"
 import { circle, element, line, linearGradient, path, rect, svg, text } from "./utils_svg";
-import { calculateNiceScale, createUid, fordinum, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
+import { calculateNiceScale, createUid, forceNum, fordinum, getMaxSerieLength, getMinMaxInDatasetItems, getSvgDimensions, ratioToMax } from "./utils_common";
 import { palette } from "./palette";
 
 // TODO: add descriptions for types
 
 export type BaseDatasetItem = StrokeOptions & {
+    /**
+     * @option data labels vertical offset for a given series
+     * @default 0
+     */
     dataLabelOffsetY?: number
+    /**
+     * @option data labels color for a given series
+     * @default "#000000"
+     */
     dataLabelsColor?: string
+    /**
+     * @option data labels font size for a given series
+     */
     dataLabelsFontSize?: number
     fill?: string
+    /**
+     * @option the gradient direction for a given bar or area series
+     * @default "vertical"
+     */
     gradientDirection?: "vertical" | "horizontal",
+    /**
+     * @option the gradient starting color for a given bar or area series
+     */
     gradientFrom?: string
+    /**
+     * @option the gradient end color for a given bar or area series
+     */
     gradientTo?: string
+    /**
+     * @option the name of a given series
+     */
     name?: string
+    /**
+     * @option the plot radius for a given line, plot or area series
+     * @default 1
+     */
     plotRadius?: number
+    /**
+     * @option the rounding of data labels for a given series
+     * @default 0
+     */
     rounding?: number
+    /**
+     * @option the rx border radius of a given bar series
+     * @default null
+     */
     rx?: number
+    /**
+     * @option the ry border radius of a given bar series
+     * @default null
+     */
     ry?: number
+    /**
+     * @option the graphical type of the series
+     * @default "line"
+     */
     type?: "line" | "bar" | "area" | "plot"
+    /**
+     * @option the values for a given series. null values can be provided in the array
+     * @example [1, 2, 3, null, 8]
+     */
     values: Array<number | null>
 }
 
 export type ChartXyDatasetItem = BaseDatasetItem & {
+    /**
+     * @option show or hide data labels of a given series
+     * @default  true
+     */
     showDataLabels?: boolean
 }
 
 export type ChartXyOptions = {
+    /**
+     * @option the color of x and y axis lines
+     * @default "#000000"
+     */
     axisColor?: string
+    /**
+     * @option the background color applied to the chart
+     * @default "#FFFFFF"
+     */
     backgroundColor?: string
+    /**
+     * @option the spacing between bars in pixels.
+     * @default 0
+     */
     barSpacing?: number
+    /**
+     * @option pass any strings separated by a space to generate class names. Example: "my-class1 my-class2".
+     */
     className?: string
+    /**
+     * @option font family for all text elements.
+     * @default "inherit"
+     */
     fontFamily?: string
+    /**
+     * @option the color of all grid line elements. Can be any color format.
+     * @default "#CCCCCC"
+     */
     gridColor?: string
+    /**
+     * @option the id of the svg. Defaults to a random uid
+     */
     id?: string
+    /**
+     * @option activates user interactions (tooltip, zoom)
+     * @default true
+     */
     interactive?: boolean
+    /**
+     * @option the text color of legend elements
+     * @default "#000000"
+     */
     legendColor?: string
+    /**
+     * @option the font size of legend elements
+     * @default 10
+     */
     legendFontSize?: number
+    /**
+     * @option leave space for the legend
+     * @default 48
+     */
     paddingBottom?: number
+    /**
+     * @option leave space for y axis labels
+     * @default 48
+     */
     paddingLeft?: number
+    /**
+     * @option leave space on the right side of the chart
+     * @default 24
+     */
     paddingRight?: number
+    /**
+     * @option leave space for the title
+     * @default 48
+     */
     paddingTop?: number
+    /**
+     * @option in interactive mode, color of the selector rect on series hover. Should be a transparent color.
+     * @default "#00000010"
+     */
     selectorColor?: string
+    /**
+     * @option standard svg rendering
+     * @default "auto"
+     */
     "shape-rendering"?: ShapeRendering
+    /**
+     * @option show or hide axis lines
+     * @default true
+     */
     showAxis?: boolean
+    /**
+     * @option show or hide grid lines
+     * @default true
+     */
     showGrid?: boolean
+    /**
+     * @option show or hide legend
+     * @default true
+     */
     showLegend?: boolean
+    /**
+     * @option the text content of the title element
+     * @default ""
+     */
     title?: string;
+    /**
+     * @option the text color of the title element
+     * @default "#000000"
+     */
     titleColor?: string
+    /**
+     * @option the font size of the title element
+     * @default 18
+     */
     titleFontSize?: number
+    /**
+     * @option the horizontal position (text-anchor) of the title element
+     * @default "start"
+     */
     titlePosition?: "start" | "middle" | "end"
+    /**
+     * @option the background color of the tooltip container
+     * @default "#FFFFFF"
+     */
     tooltipBackgroundColor?: string
+    /**
+     * @option the text color of the tooltip content
+     * @default "#000000"
+     */
     tooltipColor?: string;
+    /**
+     * @option the viewBox dimensions of the chart's svg
+     * @default "0 0 512 341"
+     */
     viewBox?: string;
+    /**
+     * @option the labels on the time axis
+     * @default []
+     * @example ["JAN", "FEB", "MAR", "APR", "MAY", "JUN"]
+     */
     xAxisLabels?: string[]
+    /**
+     * @option the color of time labels on the x axis
+     * @default "#000000"
+     */
     xAxisLabelsColor?: string
+    /**
+     * @option the font size of time labels on the x axis
+     * @default 12
+     */
     xAxisLabelsFontSize?: number
+    /**
+     * @option the vertical offset of time labels on the x axis
+     * @default 0
+     */
     xAxisLabelsOffsetY?: number
+    /**
+     * @option the color of value labels on the y axis
+     * @default "#000000"
+     */
     yAxisLabelsColor?: string
+    /**
+     * @option the font size of value labels on the y axis
+     * @default 12
+     */
     yAxisLabelsFontSize?: number
+    /**
+     * @option the rounding of y axis label values
+     * @default 1
+     */
     yAxisLabelRounding?: number
+    /**
+     * @option the color of the zoom indicator
+     * @default "#00FF0010"
+     */
     zoomColor?: string
 }
 
@@ -83,6 +270,7 @@ export function chartXy({
     const absoluteDataset = dataset.map((ds, i) => {
         return {
             ...ds,
+            values: ds.values.map(v => forceNum(v)),
             "stroke-dasharray": ds['stroke-dasharray'] ?? null,
             "stroke-dashoffset": ds['stroke-dashoffset'] ?? null,
             "stroke-linecap": ds['stroke-linecap'] ?? 'round',

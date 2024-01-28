@@ -1,5 +1,5 @@
 import { palette } from "./palette"
-import { createUid, fordinum, getSvgDimensions, makeDonut } from "./utils_common"
+import { createUid, forceNum, fordinum, getSvgDimensions, makeDonut } from "./utils_common"
 import { circle, element, findArcMidpoint, line, offsetFromCenterPoint, path, setTextAnchorFromCenterPoint, svg, text } from "./utils_svg"
 import { ChartArea, DrawingArea, ShapeRendering, StrokeOptions, SvgItem, TextAnchor } from "./utils_svg_types"
 
@@ -10,44 +10,183 @@ export type ChartDonutDatasetItem = StrokeOptions & {
 }
 
 export type ChartDonutOptions = {
+    /**
+     * @option the background color applied to the chart
+     * @default "#FFFFFF"
+     */
     backgroundColor?: string
+    /**
+     * @option pass any strings separated by a space to generate class names. Example: "my-class1 my-class2"
+     */
     className?: string
+    /**
+     * @option display data labels as divs inside a foreignObject, to get more control on the styling (line breaks, etc). If false, displays the data labels as a svg text element, with no control over line breaks.
+     * @default false
+     */
     dataLabelsAsDivs?: boolean
+    /**
+     * @option the text color of data labels
+     * @default "#000000"
+     */
     dataLabelsColor?: string
+    /**
+     * @option the font size of data labels
+     * @default 12
+     */
     dataLabelsFontSize?: number
+    /**
+     * @option the rounding of the percentage displayed in data labels
+     * @default 0
+     */
     dataLabelsRoundingPercentage?: number
+    /**
+     * @option the rounding of the value displayed in data labels
+     * @default 0
+     */
     dataLabelsRoundingValue?: number
+    /**
+     * @option the offset of data labels from the arcs
+     * @default 40
+     */
     dataLabelsOffset?: number
+    /**
+     * @option the offset of the data labels line markers
+     * @default 20
+     */
     dataLabelsLineOffset?: number
+    /**
+     * @option the border width of the donut arcs
+     * @default 1
+     */
     donutBorderWidth?: number
+    /**
+     * @option the size ratio of the overall donut radius
+     * @default 1
+     * @example 0.8 will make it smaller
+     */
     donutRadiusRatio?: number
+    /**
+     * @option the thickness of donut arcs
+     * @default 48
+     */
     donutThickness?: number
+    /**
+     * @option font family for all text elements
+     * @default "inherit"
+     */
     fontFamily?: string
+    /**
+     * @option values under this threshold will be displayed in smaller font and stacked to the top of the chart
+     * @default 3
+     */
     hideLabelUnderPercentage?: number
+    /**
+     * @option the id of the svg. Defaults to a random uid
+     */
     id?: string
+    /**
+     * @option activates user interactions (tooltip)
+     * @default true
+     */
     interactive?: boolean
+    /**
+     * @option the text color of legend elements
+     * @default "#000000"
+     */
     legendColor?: string
+    /**
+     * @option the font size of legend elements
+     * @default 10
+     */
     legendFontSize?: number
+    /**
+     * @option the vertical offset of the legend foreignObject container
+     * @default 40
+     */
     legendOffsetY?: number
     paddingBottom?: number
     paddingLeft?: number
     paddingRight?: number
     paddingTop?: number
+    /**
+    * @option standard svg rendering
+    * @default "auto"
+    */
     "shape-rendering"?: ShapeRendering
+    /**
+     * @option show or hide data labels
+     * @default true
+     */
     showDataLabels?: boolean
+    /**
+     * @option show or hide legend
+     * @default true
+     */
     showLegend?: boolean
+    /**
+     * @option show or hide total displayed inside the donut's hollow
+     * @default true
+     */
     showTotal?: boolean,
+    /**
+     * @option the text content of the title element
+     * @default ""
+     */
     title?: string;
+    /**
+     * @option the text color of the title element
+     * @default "#000000"
+     */
     titleColor?: string
+    /**
+     * @option the font size of the title element
+     * @default 18
+     */
     titleFontSize?: number
+    /**
+     * @option the horizontal position (text-anchor) of the title element
+     * @default "middle"
+     */
     titlePosition?: TextAnchor
+    /**
+     * @option the background color of the tooltip container
+     * @default "#FFFFFF"
+     */
     tooltipBackgroundColor?: string
+    /**
+     * @option the text color of the tooltip content
+     * @default "#000000"
+     */
     tooltipColor?: string
+    /**
+     * @option the text content of the total label inside the donut's hollow
+     * @default "Total"
+     */
     totalLabel?: string
+    /**
+     * @option the text color of the total label inside the donut's hollow
+     * @default "#000000"
+     */
     totalLabelColor?: string
+    /**
+     * @option the font size of the total label inside the donut's hollow
+     * @default 20
+     */
     totalLabelFontSize?: number
+    /**
+     * @option the font size of the total value inside the donut's hollow
+     * @default 20
+     */
     totalValueFontSize?: number
+    /**
+     * @option the rounding of the total value inside the donut's hollow
+     * @default 0
+     */
     totalValueRounding?: number
+    /**
+     * @option the viewBox dimensions of the chart's svg
+     * @default "0 0 450 450"
+     */
     viewBox?: string
 }
 
@@ -69,16 +208,18 @@ export function chartDonut({
 }) {
 
     const globalUid = createUid();
-    const grandTotal = dataset.map(ds => ds.value ?? 0).reduce((a, b) => a + b, 0)
+    const grandTotal = dataset.map(ds => forceNum(ds.value)).reduce((a, b) => a + b, 0)
 
     const formattedDataset = dataset.map((ds, i) => {
+        const value = forceNum(ds.value)
         return {
             ...ds,
+            value,
             color: ds.color ?? palette[i],
             "stroke-width": ds["stroke-width"] ?? 20,
             "stroke-linecap": ds["stroke-linecap"] ?? 'butt',
             uid: createUid(),
-            proportion: (ds.value ?? 0) / grandTotal
+            proportion: value / grandTotal
         }
     }).sort((a, b) => b.proportion - a.proportion)
 

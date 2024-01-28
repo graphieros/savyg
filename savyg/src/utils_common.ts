@@ -14,9 +14,9 @@ export function getSvgDimensions(viewBox: string) {
 export function getMinMaxInDatasetItems(datasetItems: BaseDatasetItem[], zoom?: { start: number, end: number }) {
     let flattened;
     if (zoom) {
-        flattened = datasetItems.flatMap(d => d.values.filter((_, i) => i >= zoom.start && i <= zoom.end).filter(v => v !== null)) as number[];
+        flattened = datasetItems.flatMap(d => d.values.map(v => forceNum(v)).filter((_, i) => i >= zoom.start && i <= zoom.end).filter(v => v !== null)) as number[];
     } else {
-        flattened = datasetItems.flatMap(d => d.values.filter(v => v !== null)) as number[];
+        flattened = datasetItems.flatMap(d => d.values.map(v => forceNum(v)).filter(v => v !== null)) as number[];
     }
     return {
         max: Math.max(...flattened),
@@ -27,7 +27,7 @@ export function getMinMaxInDatasetItems(datasetItems: BaseDatasetItem[], zoom?: 
 export function getMaxSerieLength(datasetItems: BaseDatasetItem[], zoom?: { start: number, end: number }) {
     if (zoom) {
         return {
-            maxSeriesLength: Math.max(...datasetItems.map(d => d.values.filter((_v, i) => i >= zoom.start && i <= zoom.end).length))
+            maxSeriesLength: Math.max(...datasetItems.map(d => d.values.map(v => forceNum(v)).filter((_v, i) => i >= zoom.start && i <= zoom.end).length))
         }
     } else {
         return {
@@ -267,9 +267,14 @@ export function fordinum(n: number, r: number = 0, s: string = '', p: string = '
     return p + (Number(n).toFixed(r)).toLocaleString() + s
 }
 
+export function forceNum(n: number | string | null | undefined): number {
+    return isNaN(Number(n)) ? 0 : Number(n)
+}
+
 const utils_commons = {
     calculateNiceScale,
     createUid,
+    forceNum,
     fordinum,
     getClosestDecimal,
     getMaxSerieLength,

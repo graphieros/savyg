@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax, fordinum } from "../src/utils_common"
+import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax, fordinum, forceNum } from "../src/utils_common"
 
 describe('getSvgDimensions', () => {
     test('parses dimensions of a string viewBox', () => {
@@ -109,5 +109,16 @@ describe('fordinum', () => {
     })
     test("returns a number with prefix and suffix", () => {
         expect(fordinum(1, 0, '_suffix', 'prefix_')).toBe('prefix_1_suffix')
+    })
+})
+
+describe('forceNum', () => {
+    test('forces a number return', () => {
+        expect(forceNum(1)).toBe(1)
+        expect(forceNum(1.1)).toBe(1.1)
+        expect(forceNum("1")).toBe(1)
+        expect(forceNum("1.1")).toBe(1.1)
+        expect(forceNum("wut")).toBe(0)
+        expect(forceNum(null)).toBe(0)
     })
 })

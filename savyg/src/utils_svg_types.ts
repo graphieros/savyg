@@ -106,7 +106,13 @@ export type Text = CommonOptions & StrokeOptions & {
     "font-size"?: number
     "font-weight"?: "bold" | "normal"
     "text-anchor"?: TextAnchor
+    /**
+     * @description The content of the text element. Should be kept concise, as SVG text element do not break into multiple lines
+     */
     content: string
+    /**
+     * @description The color of the text. Can be any color format
+     */
     fill?: string
     id?: string
 }

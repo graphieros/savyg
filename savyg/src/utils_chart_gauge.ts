@@ -1,10 +1,16 @@
 import { circle, element, line, path, svg, text } from ".";
 import { palette } from "./palette";
-import { createUid, getSvgDimensions, makeDonut, fordinum } from "./utils_common";
+import { createUid, getSvgDimensions, makeDonut, fordinum, forceNum } from "./utils_common";
 import { ChartArea, DrawingArea, ShapeRendering, SvgItem, TextAnchor } from "./utils_svg_types";
 
 export type ChartGaugeSegment = {
+    /**
+     * @description the starting value of a gauge segment
+     */
     from: number
+    /**
+     * @escription the ending value of a gauge segment
+     */
     to: number
     color?: string
 }
@@ -15,37 +21,148 @@ export type ChartGaugeDataset = {
 }
 
 export type ChartGaugeOptions = {
+    /**
+     * @option the thickness of the gauge arcs
+     * @default 58
+     */
     arcThickness?: number
+    /**
+     * @option the background color applied to the chart
+     * @default "#FFFFFF"
+     */
     backgroundColor?: string
+    /**
+     * @option pass any strings separated by a space to generate class names. Example: "my-class1 my-class2"
+     */
     className?: string
+    /**
+     * @option the text color of data labels
+     * @default "#000000"
+     */
     dataLabelsColor?: string
+    /**
+     * @option the font size of data labels
+     * @default 12
+     */
     dataLabelsFontSize?: number
+    /**
+     * @option the data labels offset from the arcs
+     * @default 1.4
+     * @example 1.2 will push data labels closer to the arcs
+     */
     dataLabelsOffset?: number,
+    /**
+     * @option font family for all text elements
+     * @default "inherit"
+     */
     fontFamily?: string
+    /**
+     * @option the id of the svg. Defaults to a random uid
+     */
     id?: string
     paddingBottom?: number
     paddingLeft?: number
     paddingRight?: number
     paddingTop?: number
+    /**
+     * @option the color of the pointer base circle
+     * @default "#1A1A1A"
+     */
     pointerBaseColor?: string
+    /**
+     * @option the radius of the pointer base circle
+     * @default 5
+     */
     pointerBaseRadius?: number
+    /**
+     * @option the border color of the pointer base circle
+     * @default "#FFFFFF"
+     */
     pointerBaseStroke?: string
+    /**
+     * @option the stroke width of the pointer base circle border
+     * @default 1
+     */
     pointerBaseStrokeWidth?: number
+    /**
+     * @option the color of the pointer
+     * @default "#2A2A2A"
+     */
     pointerColor?: string
+    /**
+     * @option the size of the pointer. 0.9 will make it bigger. Ok this is not logical but whatever
+     * @default 1
+     */
     pointerSize?: number
+    /**
+     * @option the thickness of the pointer
+     * @default 5
+     */
     pointerWidth?: number
+    /**
+    * @option standard svg rendering
+    * @default "auto"
+    */
     "shape-rendering"?: ShapeRendering
+    /**
+     * @option show or hide segment data labels
+     * @default true
+     */
     showDataLabels?: boolean
+    /**
+     * @option show or hide the gaueg value
+     * @default true
+     */
     showValue?: boolean
+    /**
+     * @option the text content of the title element
+     * @default ""
+     */
     title?: string
+    /**
+     * @option the text color of the title element
+     * @default "#000000"
+     */
     titleColor?: string
+    /**
+     * @option the font size of the title element
+     * @default 18
+     */
     titleFontSize?: number
+    /**
+     * @option the font weight of the title element
+     * @default "bold"
+     */
     titleFontWeight?: "bold" | "normal"
+    /**
+     * @option the horizontal position (text-anchor) of the title element
+     * @default "middle"
+     */
     titlePosition?: TextAnchor
+    /**
+     * @option the color of the gauge value
+     * @default "#000000"
+     */
     valueColor?: string
+    /**
+     * @option the font size of the gauge value
+     * @default 20
+     */
     valueFontSize?: number
+    /**
+     * @option the font weight of the gauge value
+     * @default "normal"
+     */
     valueFontWeight?: "bold" | "normal"
+    /**
+     * @option the rounding of the gauge value
+     * @default 0
+     */
     valueRounding?: number
+    /**
+     * @option the viewBox dimensions of the chart's svg
+     * @default "0 0 450 300"
+     */
     viewBox?: string
 }
 
@@ -130,8 +247,8 @@ export function chartGauge({
     const minMax = (function IIFE() {
         const arr: number[] = []
         dataset.segments.forEach(s => {
-            arr.push(s.from)
-            arr.push(s.to)
+            arr.push(forceNum(s.from))
+            arr.push(forceNum(s.to))
         })
         return {
             max: Math.max(...arr),
@@ -142,7 +259,7 @@ export function chartGauge({
     const pointerCoordinates = (function IIFE() {
         const x = drawingArea.centerX
         const y = drawingArea.centerY + height / 4
-        const angle = Math.PI * ((dataset.value - minMax.min) / (minMax.max - minMax.min)) + Math.PI
+        const angle = Math.PI * ((forceNum(dataset.value) - minMax.min) / (minMax.max - minMax.min)) + Math.PI
         return {
             x1: x,
             y1: y,
@@ -158,9 +275,9 @@ export function chartGauge({
                 ...s,
                 id: `${globalUid}_segment_${i}`,
                 color: s.color ?? palette[i],
-                value: ((s.to - s.from) / minMax.max) * 100
+                value: ((forceNum(s.to) - forceNum(s.from)) / minMax.max) * 100
             }
-        }), { color: 'transparent', value: 0, from: dataset.segments[dataset.segments.length - 1].to, to: dataset.segments[dataset.segments.length - 1].to }]
+        }), { color: 'transparent', value: 0, from: forceNum(dataset.segments[dataset.segments.length - 1].to), to: forceNum(dataset.segments[dataset.segments.length - 1].to) }]
     }
 
     const segments = element({
