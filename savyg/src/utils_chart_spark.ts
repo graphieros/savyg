@@ -10,7 +10,7 @@ export type ChartSparkDataset = StrokeOptions & {
 }
 
 export type ChartSparkOptions = {
-    areaOpacity: number;
+    areaOpacity?: number;
     /**
      * @option the color of x and y axis lines
      * @default "#CCCCCC"
@@ -68,7 +68,7 @@ export type ChartSparkOptions = {
      * @option The rounding of the hovered value information
      * @default 0
      */
-    rounding: number;
+    rounding?: number;
     /**
      * @option show or hide the area
      * @default true
