@@ -460,7 +460,6 @@ export function radialGradient(attrs: {
 }
 
 export function findArcMidpoint(pathElement: SVGPathElement) {
-    console.log({ pathElement })
     const length = pathElement.getTotalLength();
     let start = 0;
     let end = length;

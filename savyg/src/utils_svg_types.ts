@@ -213,6 +213,8 @@ export type ChartArea = {
     bottom: number
     centerX?: number
     centerY?: number
+    height?: number
+    width?: number
 }
 
 export type PreserveAspectRatioValue =

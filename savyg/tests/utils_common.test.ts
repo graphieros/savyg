@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax, fordinum, forceNum } from "../src/utils_common"
+import { getSvgDimensions, getMinMaxInDatasetItems, getMaxSerieLength, getClosestDecimal, calculateNiceScale, ratioToMax, fordinum, forceNum, createSmoothPath } from "../src/utils_common"
 
 describe('getSvgDimensions', () => {
     test('parses dimensions of a string viewBox', () => {
@@ -120,5 +120,19 @@ describe('forceNum', () => {
         expect(forceNum("1.1")).toBe(1.1)
         expect(forceNum("wut")).toBe(0)
         expect(forceNum(null)).toBe(0)
+    })
+})
+
+describe('createSmoothPath', () => {
+    test('creates a smooth path from a set of coordinates', () => {
+        const points = [
+            { x: 0, y: 0 },
+            { x: 10, y: 10 },
+            { x: 20, y: 0 },
+            { x: 30, y: 10 },
+            { x: 40, y: 0 },
+            { x: 50, y: 10 }
+        ];
+        expect(createSmoothPath(points)).toStrictEqual("0,0  C 2.0000000000000004,2 6,10 10,10  C 14,10 16,4.898587196589413e-16 20,0  C 24,0 26,10 30,10  C 34,10 36,4.898587196589413e-16 40,0  C 44,0 48,8 50,10 ")
     })
 })

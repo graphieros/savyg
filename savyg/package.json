@@ -1,7 +1,7 @@
 {
   "name": "savyg",
   "private": false,
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A savvy library to create svg elements and charts with ease",
   "author": "Alec Lloyd Probert",
   "repository": {
@@ -23,7 +23,8 @@
     "circle",
     "rect",
     "polygon",
-    "foreignObject"
+    "foreignObject",
+    "sparkline"
   ],
   "files": [
     "dist"

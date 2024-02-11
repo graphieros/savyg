@@ -137,6 +137,28 @@ chartGauge({
 
 [check the docs](https://savyg.graphieros.com/docs#charts)
 
+Here is how you can create a sparkline chart:
+
+```
+import { chartSparkline } from "savyg";
+
+chartSparkline({
+    dataset : {
+        name: 'Title',
+        values: [1, 2, 3, 5, 8, 13],
+        periods: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN']
+    },
+    // The HTML element where the chart will be inserted:
+    parent: document.querySelector('#myDiv'),
+    options: {
+        titleFontSize: 8,
+        showArea: true
+    }
+});
+
+```
+
+[check the docs](https://savyg.graphieros.com/docs#charts)
 
 ## SVG api
 

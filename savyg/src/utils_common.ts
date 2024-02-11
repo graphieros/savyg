@@ -1,4 +1,5 @@
 import { BaseDatasetItem } from "./utils_chart_xy";
+import { Coordinates } from "./utils_svg_types";
 
 export function getSvgDimensions(viewBox: string) {
     const dimensions = viewBox.split(' ');
@@ -20,7 +21,7 @@ export function getMinMaxInDatasetItems(datasetItems: BaseDatasetItem[], zoom?: 
     }
     return {
         max: Math.max(...flattened),
-        min: Math.min(...flattened)
+        min: Math.min(...flattened) >= 0 ? 0 : Math.min(...flattened)
     }
 }
 
@@ -271,8 +272,44 @@ export function forceNum(n: number | string | null | undefined): number {
     return isNaN(Number(n)) ? 0 : Number(n)
 }
 
+export function createSmoothPath(points: Coordinates[]) {
+    const smoothing = 0.2; // Could be a user option
+    function l(pointA: Coordinates, pointB: Coordinates) {
+        const lengthX = pointB.x - pointA.x;
+        const lengthY = pointB.y - pointA.y;
+        return {
+            length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
+            angle: Math.atan2(lengthY, lengthX)
+        };
+    }
+    function controlPoint(current: Coordinates, previous: Coordinates, next: Coordinates, reverse?: boolean) {
+        const p = previous || current;
+        const n = next || current;
+        const o = l(p, n);
+
+        const angle = o.angle + (reverse ? Math.PI : 0);
+        const length = o.length * smoothing;
+
+        const x = current.x + Math.cos(angle) * length;
+        const y = current.y + Math.sin(angle) * length;
+        return { x, y };
+    }
+    function bezierCommand(point: Coordinates, i: number, a: Coordinates[]) {
+        const cps = controlPoint(a[i - 1], a[i - 2], point);
+        const cpe = controlPoint(point, a[i - 1], a[i + 1], true);
+        return `C ${cps.x},${cps.y} ${cpe.x},${cpe.y} ${point.x},${point.y}`;
+    }
+    const d = points.reduce((acc, point, i, a) => i === 0
+        ? `${point.x},${point.y} `
+        : `${acc} ${bezierCommand(point, i, a)} `
+        , '');
+
+    return d;
+}
+
 const utils_commons = {
     calculateNiceScale,
+    createSmoothPath,
     createUid,
     forceNum,
     fordinum,
