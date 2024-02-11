@@ -1,7 +1,24 @@
-import { chartXy, arrow, chartDonut, text, chartGauge, clipPath, path, use, findArcMidpoint, ChartXyDatasetItem } from "savyg";
+import { chartXy, arrow, chartDonut, text, chartGauge, clipPath, path, use, findArcMidpoint, ChartXyDatasetItem, chartSparkline, ChartSparkOptions } from "savyg";
 
 // const parent = document.getElementById("svg") as HTMLElement
 const div = document.getElementById("div") as HTMLElement
+
+const sparkDs = {
+  name: "Title",
+  values: [12, 6, 24.15461, 13, 18, 16, 32, 8, 18, 19, 25, 36],
+  periods: ["JAN", "FEV", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+}
+
+let spark = chartSparkline({
+  dataset: sparkDs,
+  parent: div,
+  options: {
+    showTitle: true,
+    titleFontSize: 8,
+    showArea: true,
+  }
+})
+
 
 const gaugeDs = {
   value: "4.56",
