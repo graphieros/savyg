@@ -48,7 +48,7 @@
     "happy-dom": "^13.0.2",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
-    "vite-plugin-dts": "^3.7.0",
+    "vite-plugin-dts": "^4.2.2",
     "vitest": "^1.1.3"
   }
 }
