@@ -45,7 +45,7 @@
   "main": "./dist/savyg.umd.cjs",
   "module": "./dist/savyg.js",
   "devDependencies": {
-    "happy-dom": "^20.0.0",
+    "happy-dom": "^21.0.4",
     "typescript": "^5.0.2",
     "vite": "^8.0.16",
     "vite-plugin-dts": "^5.0.3",
